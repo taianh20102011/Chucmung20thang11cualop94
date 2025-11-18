@@ -1,190 +1,366 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tri Ân Thầy Cô 20/11</title>
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-<style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body, html { width: 100%; height: 100%; font-family: 'Poppins', sans-serif; overflow-x: hidden; }
-    /* ================= Intro ================ */
-    #intro {
-        display: flex; justify-content: center; align-items: center;
-        flex-direction: column;
-        position: relative; width: 100%; height: 100vh;
-        background: linear-gradient(135deg, #ffafbd, #ffc3a0);
-        animation: fadeIn 2s ease forwards;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tri ân 20/11 - Lớp 9/4</title>
+  <style>
+    :root{
+      --bg1:#06283D; /* deep blue */
+      --bg2:#2A6F97; /* teal */
+      --accent:#ffd6e0; /* soft pink */
+      --glass: rgba(255,255,255,0.06);
+      --card: rgba(255,255,255,0.08);
     }
-    .heart {
-        width: 100px; height: 100px; background: red;
-        position: relative; transform: rotate(-45deg);
-        animation: scaleHeart 1.5s ease forwards;
-        cursor: pointer;
-    }
-    .heart::before, .heart::after {
-        content: ""; width: 100px; height: 100px; background: red; border-radius: 50%;
-        position: absolute;
-    }
-    .heart::before { top: -50px; left: 0; }
-    .heart::after { left: 50px; top: 0; }
-    @keyframes scaleHeart {
-        0% { transform: rotate(-45deg) scale(0); opacity: 0; }
-        100% { transform: rotate(-45deg) scale(1.5); opacity: 1; }
-    }
-    @keyframes fadeIn { 0% {opacity:0;} 100% {opacity:1;} }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter, Poppins, system-ui, Arial;background:linear-gradient(120deg,var(--bg1),var(--bg2));color:#fff}
 
-    /* ================= Pháo hoa ================ */
-    .firework {
-        position: absolute; width: 6px; height: 6px;
-        border-radius: 50%; background: gold; opacity: 0;
-        animation: explode 1s ease forwards;
-    }
-    @keyframes explode {
-        0% { transform: scale(0); opacity: 1; }
-        100% { transform: scale(4); opacity: 0; }
+    /* ---------- GLOBAL LAYERS ---------- */
+    .stage{position:relative;width:100%;height:100vh;overflow:hidden}
+    canvas.fireworks{position:absolute;inset:0;z-index:5;pointer-events:none}
+    .bokeh{position:absolute;inset:0;z-index:2;pointer-events:none;background-image:radial-gradient(circle at 20% 30%, rgba(255,255,255,0.03) 0, transparent 20%),radial-gradient(circle at 80% 70%, rgba(255,255,255,0.02) 0, transparent 18%)}
+
+    /* ---------- FLOWER-BLOOM HEART INTRO ---------- */
+    #intro{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:10}
+    .heart-wrap{position:relative;width:420px;height:280px;display:flex;align-items:center;justify-content:center}
+
+    /* flower petals built with CSS shapes */
+    .petal{position:absolute;width:160px;height:200px;background:linear-gradient(180deg,#ff92b6,#ff5c8a);border-radius:80% 80% 40% 40%;transform-origin:center bottom;filter:drop-shadow(0 10px 25px rgba(255,90,120,0.18));opacity:0}
+    .petal.p1{transform:translate(-80px,-30px) rotate(-20deg) scale(0.6)}
+    .petal.p2{transform:translate(80px,-30px) rotate(20deg) scale(0.6)}
+    .petal.p3{transform:translate(0px,10px) rotate(0deg) scale(0.6)}
+    .petal.p4{transform:translate(-40px,40px) rotate(-45deg) scale(0.55)}
+    .petal.p5{transform:translate(40px,40px) rotate(45deg) scale(0.55)}
+
+    /* bloom animations */
+    .petal.animate{animation:bloom 1.2s forwards cubic-bezier(.2,.9,.1,1)}
+    .petal.animate.delay1{animation-delay:0.15s}
+    .petal.animate.delay2{animation-delay:0.28s}
+    .petal.animate.delay3{animation-delay:0.4s}
+    .petal.animate.delay4{animation-delay:0.52s}
+
+    @keyframes bloom{
+      0%{transform:scale(0.35) translateY(40px) rotate(0);opacity:0}
+      60%{opacity:1}
+      100%{transform:scale(1) translateY(0) rotate(0);opacity:1}
     }
 
-    /* ================= Chọn giáo viên ================ */
-    #teacherSelect {
-        display: none; flex-direction: column; justify-content: center; align-items: center;
-        width: 100%; height: 100vh; background: #f0f8ff;
-        padding: 20px;
-    }
-    #teacherSelect button {
-        padding: 15px 25px; margin: 10px; font-size: 18px;
-        border-radius: 12px; border: none; cursor: pointer;
-        background: #ff6b81; color: #fff; transition: 0.3s;
-    }
-    #teacherSelect button:hover { background: #ff4757; }
+    /* center core (small heart) */
+    .core{width:120px;height:110px;border-radius:50% 50% 45% 45%;background:radial-gradient(circle at 35% 30%,#fff3f6 0,#ff9eb6 10%,#ff5c8a 60%);transform:rotate(45deg);filter:drop-shadow(0 8px 30px rgba(255,80,120,0.25));opacity:0;transform-origin:center;animation:corePop 0.9s 0.7s forwards}
+    @keyframes corePop{0%{transform:scale(0.2) rotate(45deg);opacity:0}60%{opacity:1}100%{transform:scale(1) rotate(45deg);opacity:1}}
 
-    /* ================= Slideshow / Landing page ================ */
-    #slideshow {
-        display: none; width: 100%; height: 100vh; position: relative; overflow: hidden;
-        background: linear-gradient(120deg, #89f7fe, #66a6ff);
-    }
-    .slide {
-        position: absolute; width: 100%; height: 100%; display: flex;
-        justify-content: center; align-items: center; font-size: 2rem;
-        color: #fff; opacity: 0; transition: opacity 1s ease;
-    }
-    .slide.active { opacity: 1; }
+    /* intro text */
+    .intro-text{margin-top:24px;font-size:28px;letter-spacing:1px;color:var(--accent);opacity:0;text-align:center}
+    .intro-text.show{animation:fadeUp 0.9s 0.95s forwards}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 
-    /* ================= Lời chúc ================ */
-    #wish {
-        display: none; width: 100%; height: 100vh;
-        justify-content: center; align-items: center; flex-direction: column;
-        background: #fffbe6; text-align: center; padding: 20px;
-    }
-    #wish h1 { font-family: 'Pacifico', cursive; color: #ff4757; margin-bottom: 20px; }
-    #wish p { font-size: 20px; color: #333; max-width: 600px; }
+    /* sparkle/gold particles around heart */
+    .spark-wrap{position:absolute;inset:0;z-index:9;pointer-events:none}
 
-</style>
+    /* ---------- ENVELOPE / LETTER ---------- */
+    #letterStage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:11;pointer-events:none}
+    .envelope{width:320px;height:210px;background:linear-gradient(180deg,#fff,#ffeef3);border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.45);position:relative;transform-style:preserve-3d;cursor:pointer;pointer-events:auto}
+    .env-flap{position:absolute;left:0;right:0;top:0;height:60%;background:linear-gradient(180deg,#ffdfe8,#fff);border-top-left-radius:12px;border-top-right-radius:12px;transform-origin:top center;transform:rotateX(0deg);transition:transform .8s cubic-bezier(.2,.9,.1,1);z-index:3}
+    .env-body{position:absolute;left:8px;right:8px;bottom:8px;top:48px;background:#fff;border-radius:8px;padding:18px;overflow:hidden}
+    .letter-inner{position:absolute;left:12px;right:12px;bottom:12px;height:0;background:linear-gradient(180deg,#fff,#fff);border-radius:8px;transform-origin:bottom center;transition:height .7s ease .3s}
+
+    .envelope.open .env-flap{transform:rotateX(-140deg)}
+    .envelope.open .letter-inner{height:86%}
+
+    .open-hint{position:absolute;bottom:12px;left:0;right:0;text-align:center;color:#fff;opacity:.95;font-weight:600}
+
+    /* teacher select modal */
+    .modal{position:fixed;left:50%;top:80%;transform:translate(-50%,0);z-index:12;background:var(--card);padding:20px;border-radius:14px;backdrop-filter:blur(6px);display:flex;gap:12px;align-items:center;box-shadow:0 8px 40px rgba(0,0,0,0.5)}
+    .modal select{padding:12px;border-radius:10px;border:none;font-size:16px}
+    .modal button{padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,#3bb6ff,#2a9df4);color:#04293A;font-weight:700;cursor:pointer}
+
+    /* ---------- FILM / SLIDES ---------- */
+    #film{position:absolute;inset:0;z-index:6;display:none;padding:20px;overflow:hidden}
+    .film-track{display:flex;gap:28px;align-items:center;height:100%;transition:transform .9s cubic-bezier(.2,.9,.1,1)}
+    .frame{min-width:88vw;height:76vh;border-radius:18px;background:#111;background-size:cover;background-position:center;flex-shrink:0;display:flex;align-items:flex-end;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,0.6);backdrop-filter:blur(6px)}
+
+    .frame .caption{background:linear-gradient(90deg, rgba(0,0,0,0.6), rgba(0,0,0,0.25));padding:14px;border-radius:12px}
+    .frame .caption h3{margin:0 0 6px 0}
+    .frame .caption p{margin:0;color:#ddd}
+
+    .controls{position:absolute;left:50%;transform:translateX(-50%);bottom:30px;display:flex;gap:12px;z-index:20}
+    .controls button{background:var(--glass);border:none;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}
+
+    /* ---------- POLAROID GALLERY ---------- */
+    .polaroid-container{position:absolute;right:20px;bottom:20px;z-index:7;pointer-events:none}
+    .polaroid{width:110px;height:140px;background:#fff;padding:10px;border-radius:8px;box-shadow:0 14px 40px rgba(0,0,0,0.45);display:block;object-fit:cover;margin-bottom:12px;transform-origin:center;opacity:0}
+    .falling{animation:fall 1.6s forwards cubic-bezier(.18,.9,.2,1)}
+    .delay1{animation-delay:.3s}.delay2{animation-delay:.55s}.delay3{animation-delay:.75s}
+    @keyframes fall{0%{opacity:0;transform:translateY(-40vh) rotate(-6deg) scale(.7)}60%{opacity:1}100%{transform:translateY(0) rotate(0) scale(1)}}
+
+    /* bokeh glow on polaroid */
+    .polaroid::after{content:"";position:absolute;inset:0;border-radius:8px;box-shadow:inset 0 0 60px rgba(255,200,220,0.04)}
+
+    /* ---------- STUDENT WISHES PAGE ---------- */
+    #wishes{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;padding:30px}
+    .wish-card{max-width:880px;background:linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));padding:30px;border-radius:18px;backdrop-filter:blur(6px);box-shadow:0 30px 80px rgba(0,0,0,0.5);}
+    .wish-card h2{margin-top:0}
+    .wish-list{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+    .wish-item{background:rgba(255,255,255,0.03);padding:12px;border-radius:10px}
+
+    /* responsive */
+    @media (max-width:900px){
+      .frame{min-width:92vw;height:68vh}
+      .film-track{gap:16px}
+      .polaroid-container{display:none}
+      .modal{left:50%;top:auto;bottom:18px}
+    }
+  </style>
 </head>
 <body>
 
-<!-- ================= INTRO ================ -->
-<div id="intro">
-    <div class="heart" id="openHeart"></div>
-    <h2 style="margin-top:20px;">Tri Ân Thầy Cô - Lớp 9/4</h2>
-    <audio id="bgMusic" src="https://www.bensound.com/bensound-music/bensound-romantic.mp3" loop></audio>
-</div>
+  <div class="stage">
+    <canvas class="fireworks"></canvas>
+    <div class="bokeh"></div>
 
-<!-- ================= CHỌN GIÁO VIÊN ================ -->
-<div id="teacherSelect">
-    <h2>Chọn giáo viên</h2>
-    <div id="teacherButtons"></div>
-</div>
+    <!-- INTRO FLOWER-HEART -->
+    <section id="intro">
+      <div class="heart-wrap">
+        <div class="petal p1"></div>
+        <div class="petal p2"></div>
+        <div class="petal p3"></div>
+        <div class="petal p4"></div>
+        <div class="petal p5"></div>
+        <div class="core"></div>
+      </div>
+      <div class="intro-text" id="introText">Tri ân thầy cô 20/11 — Lớp 9/4</div>
+      <div class="spark-wrap" id="sparkWrap"></div>
+    </section>
 
-<!-- ================= SLIDESHOW ================ -->
-<div id="slideshow">
-    <div class="slide active">🎉 20/11 - Lễ tri ân thầy cô 🎉</div>
-    <div class="slide">🌸 Cảm ơn thầy cô đã dạy dỗ 🌸</div>
-    <div class="slide">💖 Chúc thầy cô luôn hạnh phúc 💖</div>
-    <div class="slide">✨ Lớp 9/4 kính chúc thầy cô ✨</div>
-</div>
+    <!-- ENVELOPE -->
+    <div id="letterStage">
+      <div class="envelope" id="envelope" title="Nhấn để mở thư">
+        <div class="env-flap"></div>
+        <div class="env-body">
+          <div class="letter-inner" id="letterInner">
+            <div style="padding:18px;color:#333;"> <!-- inside letter content (hidden until open) -->
+              <h3 style="margin:0 0 6px 0">Lời tri ân lớp 9/4</h3>
+              <p style="margin:0;color:#444">Kính chúc thầy cô 20/11 vui vẻ, mạnh khỏe và hạnh phúc. Cảm ơn vì tất cả!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="open-hint">Nhấn để mở thư gửi thầy cô ❤️</div>
+    </div>
 
-<!-- ================= LỜI CHÚC ================= -->
-<div id="wish">
-    <h1>Lời Chúc Dành Cho Thầy/Cô</h1>
-    <p id="studentWish"></p>
-</div>
+    <!-- TEACHER CHOICE -->
+    <div class="modal" id="teacherModal" style="display:none;pointer-events:auto">
+      <label style="color:#cfe7ff;font-weight:700">Chọn thầy/cô:</label>
+      <select id="teacherSelect">
+        <option value="">-- Chọn --</option>
+        <option value="CoA">Cô A</option>
+        <option value="ThayB">Thầy B</option>
+        <option value="CoC">Cô C</option>
+      </select>
+      <button id="startBtn">Bắt đầu</button>
+    </div>
 
-<script>
-const intro = document.getElementById('intro');
-const openHeart = document.getElementById('openHeart');
-const bgMusic = document.getElementById('bgMusic');
-const teacherSelect = document.getElementById('teacherSelect');
-const teacherButtons = document.getElementById('teacherButtons');
-const slideshow = document.getElementById('slideshow');
-const slides = document.querySelectorAll('.slide');
-const wish = document.getElementById('wish');
-const studentWish = document.getElementById('studentWish');
+    <!-- FILM SLIDES -->
+    <section id="film">
+      <div class="film-track" id="filmTrack">
+        <div class="frame" id="f1"><div class="caption"><h3 id="c1title"></h3><p id="c1text"></p></div></div>
+        <div class="frame" id="f2"><div class="caption"><h3 id="c2title"></h3><p id="c2text"></p></div></div>
+        <div class="frame" id="f3"><div class="caption"><h3 id="c3title"></h3><p id="c3text"></p></div></div>
+      </div>
+      <div class="controls">
+        <button id="prev">Prev</button>
+        <button id="next">Next</button>
+        <button id="gotoWishes">Lời chúc</button>
+      </div>
+    </section>
 
-// Danh sách giáo viên và lời chúc riêng
-const teachers = [
-    {name:'Thầy A', wish:'Cảm ơn thầy A đã dìu dắt lớp 9/4!'},
-    {name:'Cô B', wish:'Cô B là người truyền cảm hứng cho lớp 9/4!'},
-    {name:'Thầy C', wish:'Thầy C tuyệt vời và luôn giúp đỡ học sinh!'},
-    {name:'Cô D', wish:'Cô D luôn là ngọn lửa ấm áp trong lớp!'},
-    {name:'Thầy E', wish:'Cảm ơn thầy E đã tận tâm giảng dạy!'},
-    {name:'Cô F', wish:'Cô F khiến học sinh yêu môn học hơn!'},
-    {name:'Thầy G', wish:'Thầy G là người thầy mẫu mực!'},
-    {name:'Cô H', wish:'Cô H luôn tận tâm và đầy yêu thương!'}
-];
+    <!-- POLAROID GALLERY -->
+    <div class="polaroid-container" id="polaroids">
+      <img src="https://i.imgur.com/7m7J4pD.png" class="polaroid falling delay1" alt="p1">
+      <img src="https://i.imgur.com/NpGwz9G.jpeg" class="polaroid falling delay2" alt="p2">
+      <img src="https://i.imgur.com/z9wQ8QZ.jpeg" class="polaroid falling delay3" alt="p3">
+    </div>
 
-// ================= Intro → chọn giáo viên =================
-openHeart.addEventListener('click', () => {
-    // Chạy nhạc nền
-    bgMusic.play();
-    // Hiện chọn giáo viên
-    intro.style.display = 'none';
-    teacherSelect.style.display = 'flex';
+    <!-- STUDENT WISHES -->
+    <section id="wishes">
+      <div class="wish-card">
+        <h2>💌 Lời chúc 20/11 từ Học sinh Lớp 9/4</h2>
+        <div class="wish-list" id="wishList">
+          <!-- items added dynamically -->
+        </div>
+      </div>
+    </section>
 
-    // Tạo nút cho từng giáo viên
-    teachers.forEach(t => {
-        const btn = document.createElement('button');
-        btn.textContent = t.name;
-        btn.onclick = () => startSlideshow(t);
-        teacherButtons.appendChild(btn);
+    <!-- background music (provide music.mp3 in same folder) -->
+    <audio id="bgm" src="music.mp3" loop></audio>
+
+  </div>
+
+  <script>
+    // ---------- small helper ----------
+    const $ = (sel)=>document.querySelector(sel);
+
+    // ---------- INTRO SEQUENCE ----------
+    const petals = document.querySelectorAll('.petal');
+    const core = document.querySelector('.core');
+    const introText = document.getElementById('introText');
+    const sparkWrap = document.getElementById('sparkWrap');
+    const envelope = document.getElementById('envelope');
+    const teacherModal = document.getElementById('teacherModal');
+    const startBtn = document.getElementById('startBtn');
+    const bgm = document.getElementById('bgm');
+
+    function playBgm(){
+      // try to play (some browsers require user gesture) - will be triggered by click after open
+      bgm.volume = 0.6;
+      bgm.play().catch(()=>{});
+    }
+
+    // add bloom classes in order
+    setTimeout(()=>{
+      petals[0].classList.add('animate');
+      petals[1].classList.add('animate','delay1');
+      petals[2].classList.add('animate','delay2');
+      petals[3].classList.add('animate','delay3');
+      petals[4].classList.add('animate','delay4');
+      core.classList.add('animate');
+      introText.classList.add('show');
+
+      // gentle particle sparkles
+      createSparks(18);
+
+      // after bloom show envelope
+      setTimeout(()=>{
+        document.getElementById('letterStage').style.pointerEvents='auto';
+        document.querySelector('.open-hint').style.opacity=1;
+      },1200);
+    },350);
+
+    function createSparks(n){
+      for(let i=0;i<n;i++){
+        const s=document.createElement('div');
+        s.style.position='absolute';s.style.width='6px';s.style.height='6px';
+        s.style.borderRadius='50%';s.style.left=(40+Math.random()*60)+'%';s.style.top=(30+Math.random()*40)+'%';
+        s.style.background='radial-gradient(circle,#fff8, rgba(255,80,120,0.9) 40%, rgba(255,80,120,0.0) 60%)';
+        s.style.opacity=0; s.style.transform='scale(.3)'; s.style.pointerEvents='none';
+        sparkWrap.appendChild(s);
+        setTimeout(()=>{s.style.transition='all 1.4s cubic-bezier(.2,.9,.1,1)';s.style.opacity=1;s.style.transform='scale(1) translateY(-20px)';},100+Math.random()*400);
+        setTimeout(()=>{s.style.opacity=0; s.remove();},2200+Math.random()*1200);
+      }
+    }
+
+    // ---------- ENVELOPE OPEN ----------
+    envelope.addEventListener('click',()=>{
+      envelope.classList.toggle('open');
+      // show teacher choice modal
+      teacherModal.style.display='flex';
+      playBgm();
     });
-});
 
-// ================= Slideshow =================
-function startSlideshow(teacher) {
-    teacherSelect.style.display = 'none';
-    slideshow.style.display = 'block';
-    let index = 0;
-    const interval = setInterval(() => {
-        slides.forEach(s => s.classList.remove('active'));
-        slides[index].classList.add('active');
-        index++;
-        if(index >= slides.length){
-            clearInterval(interval);
-            showWish(teacher);
-        }
-    }, 2500); // mỗi slide 2.5s
-}
+    // ---------- TEACHER CHOICE / START ----------
+    startBtn.addEventListener('click',()=>{
+      const t = document.getElementById('teacherSelect').value;
+      if(!t) return alert('Vui lòng chọn thầy/cô');
+      teacherModal.style.display='none';
+      // begin film sequence
+      startFilm(t);
+    });
 
-// ================= Hiển thị lời chúc =================
-function showWish(teacher){
-    slideshow.style.display = 'none';
-    wish.style.display = 'flex';
-    studentWish.textContent = teacher.wish;
-}
+    // ---------- FILM SEQUENCE ----------
+    const film = document.getElementById('film');
+    const filmTrack = document.getElementById('filmTrack');
+    let idx=0;
+    const frames = [document.getElementById('f1'),document.getElementById('f2'),document.getElementById('f3')];
 
-// ================= Pháo hoa đơn giản =================
-function createFirework(){
-    const firework = document.createElement('div');
-    firework.classList.add('firework');
-    firework.style.top = Math.random()*window.innerHeight + 'px';
-    firework.style.left = Math.random()*window.innerWidth + 'px';
-    document.body.appendChild(firework);
-    setTimeout(()=> firework.remove(), 1000);
-}
-setInterval(createFirework, 700);
+    const teacherData = {
+      CoA:{slides:[
+        {img:'https://i.imgur.com/87ikIDp.jpeg',title:'Kỷ niệm cùng Cô A',txt:'Những bài học nhẹ nhàng, tận tâm.'},
+        {img:'https://i.imgur.com/NpGwz9G.jpeg',title:'Những giờ học vui',txt:'Cô luôn lắng nghe và chia sẻ.'},
+        {img:'https://i.imgur.com/z9wQ8QZ.jpeg',title:'Lời tri ân',txt:'Cảm ơn cô đã dìu dắt chúng em.'}
+      ],wishTitle:'Cô A kính mến',wishText:'Chúc cô luôn mạnh khỏe, hạnh phúc và tươi cười!'},
+      ThayB:{slides:[
+        {img:'https://i.imgur.com/oSgZxbN.jpeg',title:'Những khoảnh khắc cùng Thầy B',txt:'Sự nghiêm túc nhưng đầy ấm áp.'},
+        {img:'https://i.imgur.com/7m7J4pD.png',title:'Giờ kiểm tra',txt:'Thầy truyền cảm hứng cho chúng em.'},
+        {img:'https://i.imgur.com/87ikIDp.jpeg',title:'Lời tri ân',txt:'Cảm ơn thầy vì tất cả.'}
+      ],wishTitle:'Thầy B kính mến',wishText:'Chúc thầy luôn mạnh khỏe, thành công và nhiều niềm vui!'},
+      CoC:{slides:[
+        {img:'https://i.imgur.com/z9wQ8QZ.jpeg',title:'Kỷ niệm cùng Cô C',txt:'Nụ cười của cô là động lực.'},
+        {img:'https://i.imgur.com/NpGwz9G.jpeg',title:'Những giờ ngoại khóa',txt:'Cô luôn ở bên chúng em.'},
+        {img:'https://i.imgur.com/oSgZxbN.jpeg',title:'Lời tri ân',txt:'Cảm ơn cô vì những sẻ chia.'}
+      ],wishTitle:'Cô C kính mến',wishText:'Chúc cô một ngày 20/11 rực rỡ và an lành!'}
+    };
 
-</script>
+    function startFilm(teacherKey){
+      const data = teacherData[teacherKey];
+      if(!data) return;
+      // set frames
+      frames.forEach((f,i)=>{
+        f.style.backgroundImage = `url(${data.slides[i].img})`;
+        f.querySelector('.caption h3').innerText = data.slides[i].title;
+        f.querySelector('.caption p').innerText = data.slides[i].txt;
+      });
 
+      // show film
+      film.style.display='block';
+      // animate polaroids
+      document.querySelectorAll('.polaroid').forEach((p,idx)=>{p.src = data.slides[idx%data.slides.length].img; p.classList.remove('falling'); void p.offsetWidth; p.classList.add('falling')});
+
+      // autoplay slides every 4s
+      idx=0; updateTrack();
+      film.auto = setInterval(()=>{ idx = (idx+1)%frames.length; updateTrack();},4300);
+
+      // prepare wishes content
+      buildWishes(data.wishTitle,data.wishText);
+    }
+
+    function updateTrack(){ filmTrack.style.transform = `translateX(${ - (idx * (window.innerWidth * 0.02 + frames[0].offsetWidth)) }px)`; }
+
+    // controls
+    document.getElementById('next').addEventListener('click',()=>{ clearInterval(film.auto); idx=(idx+1)%frames.length; updateTrack(); film.auto=setInterval(()=>{ idx=(idx+1)%frames.length; updateTrack();},4300)});
+    document.getElementById('prev').addEventListener('click',()=>{ clearInterval(film.auto); idx=(idx-1+frames.length)%frames.length; updateTrack(); film.auto=setInterval(()=>{ idx=(idx+1)%frames.length; updateTrack();},4300)});
+    document.getElementById('gotoWishes').addEventListener('click',()=>{ clearInterval(film.auto); film.style.display='none'; showWishes(); });
+
+    // ---------- WISHES ----------
+    function buildWishes(title,text){
+      const wishList = document.getElementById('wishList'); wishList.innerHTML='';
+      const header = document.createElement('div'); header.className='wish-item'; header.style.fontWeight='700'; header.innerText = title + ' — ' + text; wishList.appendChild(header);
+
+      // sample student wishes - could be extended to accept input
+      const samples = [
+        'Chúc thầy cô luôn mạnh khỏe, đầy nhiệt huyết để dẫn đường chúng em.',
+        'Cảm ơn thầy cô đã cho chúng em kiến thức và tình thương.',
+        'Chúc thầy cô luôn vui vẻ, hạnh phúc và luôn nhận được yêu thương từ học sinh.',
+        'Lớp 9/4 mãi nhớ tới những kỷ niệm bên thầy cô!'
+      ];
+      samples.forEach(s=>{const el=document.createElement('div');el.className='wish-item';el.innerText='💙 '+s;wishList.appendChild(el)});
+    }
+
+    function showWishes(){
+      document.getElementById('wishes').style.display='flex';
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    // ---------- FIREWORKS (simple particles) ----------
+    const canvas = document.querySelector('canvas.fireworks');
+    const ctx = canvas.getContext('2d');
+    function resize(){canvas.width=innerWidth;canvas.height=innerHeight}
+    resize(); window.addEventListener('resize',resize);
+
+    const sparks=[];
+    function spawnFire(x,y){ for(let i=0;i<35;i++){ sparks.push({x,y, vx:(Math.random()-0.5)*6, vy:(Math.random()-1.5)*6, life: Math.random()*60+60, c: `hsl(${Math.random()*60+300},90%,60%)` }) } }
+
+    function tick(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(let i=sparks.length-1;i>=0;i--){ const p = sparks[i]; p.vy += 0.08; p.x += p.vx; p.y += p.vy; p.life--; ctx.globalCompositeOperation='lighter'; ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x,p.y, Math.max(1,p.life/30),0,Math.PI*2); ctx.fill(); if(p.life<=0) sparks.splice(i,1); } requestAnimationFrame(tick); }
+    tick();
+
+    // occasional big fireworks during film
+    setInterval(()=>{ if(document.getElementById('film').style.display==='block'){ spawnFire(Math.random()*innerWidth*0.8+innerWidth*0.1, innerHeight*0.35+Math.random()*innerHeight*0.2)} },1700);
+
+    // ---------- ensure no errors if user interacts quickly ----------
+    window.addEventListener('load',()=>{ try{ /* no-op */ }catch(e){console.error(e)} });
+
+    // accessibility: allow pressing Enter to open envelope
+    envelope.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') envelope.click(); });
+
+  </script>
 </body>
 </html>
