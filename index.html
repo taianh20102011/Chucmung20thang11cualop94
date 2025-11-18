@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tri Ân Thầy Cô 20/11</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { width: 100%; height: 100%; font-family: 'Poppins', sans-serif; overflow-x: hidden; }
+    /* ================= Intro ================ */
+    #intro {
+        display: flex; justify-content: center; align-items: center;
+        flex-direction: column;
+        position: relative; width: 100%; height: 100vh;
+        background: linear-gradient(135deg, #ffafbd, #ffc3a0);
+        animation: fadeIn 2s ease forwards;
+    }
+    .heart {
+        width: 100px; height: 100px; background: red;
+        position: relative; transform: rotate(-45deg);
+        animation: scaleHeart 1.5s ease forwards;
+        cursor: pointer;
+    }
+    .heart::before, .heart::after {
+        content: ""; width: 100px; height: 100px; background: red; border-radius: 50%;
+        position: absolute;
+    }
+    .heart::before { top: -50px; left: 0; }
+    .heart::after { left: 50px; top: 0; }
+    @keyframes scaleHeart {
+        0% { transform: rotate(-45deg) scale(0); opacity: 0; }
+        100% { transform: rotate(-45deg) scale(1.5); opacity: 1; }
+    }
+    @keyframes fadeIn { 0% {opacity:0;} 100% {opacity:1;} }
+
+    /* ================= Pháo hoa ================ */
+    .firework {
+        position: absolute; width: 6px; height: 6px;
+        border-radius: 50%; background: gold; opacity: 0;
+        animation: explode 1s ease forwards;
+    }
+    @keyframes explode {
+        0% { transform: scale(0); opacity: 1; }
+        100% { transform: scale(4); opacity: 0; }
+    }
+
+    /* ================= Chọn giáo viên ================ */
+    #teacherSelect {
+        display: none; flex-direction: column; justify-content: center; align-items: center;
+        width: 100%; height: 100vh; background: #f0f8ff;
+        padding: 20px;
+    }
+    #teacherSelect button {
+        padding: 15px 25px; margin: 10px; font-size: 18px;
+        border-radius: 12px; border: none; cursor: pointer;
+        background: #ff6b81; color: #fff; transition: 0.3s;
+    }
+    #teacherSelect button:hover { background: #ff4757; }
+
+    /* ================= Slideshow / Landing page ================ */
+    #slideshow {
+        display: none; width: 100%; height: 100vh; position: relative; overflow: hidden;
+        background: linear-gradient(120deg, #89f7fe, #66a6ff);
+    }
+    .slide {
+        position: absolute; width: 100%; height: 100%; display: flex;
+        justify-content: center; align-items: center; font-size: 2rem;
+        color: #fff; opacity: 0; transition: opacity 1s ease;
+    }
+    .slide.active { opacity: 1; }
+
+    /* ================= Lời chúc ================ */
+    #wish {
+        display: none; width: 100%; height: 100vh;
+        justify-content: center; align-items: center; flex-direction: column;
+        background: #fffbe6; text-align: center; padding: 20px;
+    }
+    #wish h1 { font-family: 'Pacifico', cursive; color: #ff4757; margin-bottom: 20px; }
+    #wish p { font-size: 20px; color: #333; max-width: 600px; }
+
+</style>
+</head>
+<body>
+
+<!-- ================= INTRO ================ -->
+<div id="intro">
+    <div class="heart" id="openHeart"></div>
+    <h2 style="margin-top:20px;">Tri Ân Thầy Cô - Lớp 9/4</h2>
+    <audio id="bgMusic" src="https://www.bensound.com/bensound-music/bensound-romantic.mp3" loop></audio>
+</div>
+
+<!-- ================= CHỌN GIÁO VIÊN ================ -->
+<div id="teacherSelect">
+    <h2>Chọn giáo viên</h2>
+    <div id="teacherButtons"></div>
+</div>
+
+<!-- ================= SLIDESHOW ================ -->
+<div id="slideshow">
+    <div class="slide active">🎉 20/11 - Lễ tri ân thầy cô 🎉</div>
+    <div class="slide">🌸 Cảm ơn thầy cô đã dạy dỗ 🌸</div>
+    <div class="slide">💖 Chúc thầy cô luôn hạnh phúc 💖</div>
+    <div class="slide">✨ Lớp 9/4 kính chúc thầy cô ✨</div>
+</div>
+
+<!-- ================= LỜI CHÚC ================= -->
+<div id="wish">
+    <h1>Lời Chúc Dành Cho Thầy/Cô</h1>
+    <p id="studentWish"></p>
+</div>
+
+<script>
+const intro = document.getElementById('intro');
+const openHeart = document.getElementById('openHeart');
+const bgMusic = document.getElementById('bgMusic');
+const teacherSelect = document.getElementById('teacherSelect');
+const teacherButtons = document.getElementById('teacherButtons');
+const slideshow = document.getElementById('slideshow');
+const slides = document.querySelectorAll('.slide');
+const wish = document.getElementById('wish');
+const studentWish = document.getElementById('studentWish');
+
+// Danh sách giáo viên và lời chúc riêng
+const teachers = [
+    {name:'Thầy A', wish:'Cảm ơn thầy A đã dìu dắt lớp 9/4!'},
+    {name:'Cô B', wish:'Cô B là người truyền cảm hứng cho lớp 9/4!'},
+    {name:'Thầy C', wish:'Thầy C tuyệt vời và luôn giúp đỡ học sinh!'},
+    {name:'Cô D', wish:'Cô D luôn là ngọn lửa ấm áp trong lớp!'},
+    {name:'Thầy E', wish:'Cảm ơn thầy E đã tận tâm giảng dạy!'},
+    {name:'Cô F', wish:'Cô F khiến học sinh yêu môn học hơn!'},
+    {name:'Thầy G', wish:'Thầy G là người thầy mẫu mực!'},
+    {name:'Cô H', wish:'Cô H luôn tận tâm và đầy yêu thương!'}
+];
+
+// ================= Intro → chọn giáo viên =================
+openHeart.addEventListener('click', () => {
+    // Chạy nhạc nền
+    bgMusic.play();
+    // Hiện chọn giáo viên
+    intro.style.display = 'none';
+    teacherSelect.style.display = 'flex';
+
+    // Tạo nút cho từng giáo viên
+    teachers.forEach(t => {
+        const btn = document.createElement('button');
+        btn.textContent = t.name;
+        btn.onclick = () => startSlideshow(t);
+        teacherButtons.appendChild(btn);
+    });
+});
+
+// ================= Slideshow =================
+function startSlideshow(teacher) {
+    teacherSelect.style.display = 'none';
+    slideshow.style.display = 'block';
+    let index = 0;
+    const interval = setInterval(() => {
+        slides.forEach(s => s.classList.remove('active'));
+        slides[index].classList.add('active');
+        index++;
+        if(index >= slides.length){
+            clearInterval(interval);
+            showWish(teacher);
+        }
+    }, 2500); // mỗi slide 2.5s
+}
+
+// ================= Hiển thị lời chúc =================
+function showWish(teacher){
+    slideshow.style.display = 'none';
+    wish.style.display = 'flex';
+    studentWish.textContent = teacher.wish;
+}
+
+// ================= Pháo hoa đơn giản =================
+function createFirework(){
+    const firework = document.createElement('div');
+    firework.classList.add('firework');
+    firework.style.top = Math.random()*window.innerHeight + 'px';
+    firework.style.left = Math.random()*window.innerWidth + 'px';
+    document.body.appendChild(firework);
+    setTimeout(()=> firework.remove(), 1000);
+}
+setInterval(createFirework, 700);
+
+</script>
+
+</body>
+</html>
