@@ -1,39 +1,368 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tri ân 20/11 - Lớp 9/4</title>
-  <style>
-    :root{
-      --bg1:#06283D; /* deep blue */
-      --bg2:#2A6F97; /* teal */
-      --accent:#ffd6e0; /* soft pink */
-      --glass: rgba(255,255,255,0.06);
-      --card: rgba(255,255,255,0.08);
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tri ân Thầy Cô 20/11 — Lớp 9/4</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0b1220;--card:#fff;--accent:#ff6b81}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Poppins',system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;background:linear-gradient(180deg,#061021 0%, #0b1630 60%);color:#fff;min-height:100vh;}
+  header{position:fixed;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;z-index:30}
+  .brand{font-weight:700;letter-spacing:0.6px}
+  .controls{display:flex;gap:10px;align-items:center}
+  .btn{background:rgba(255,255,255,0.08);border:0;padding:8px 12px;border-radius:10px;color:#fff;cursor:pointer}
+  main{padding-top:84px}
+
+  /* LANDING */
+  .landing{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .hero{width:100%;max-width:1100px;padding:40px;text-align:center}
+  .heart-wrap{display:flex;align-items:center;justify-content:center;flex-direction:column}
+  svg.heart{width:360px;height:360px;overflow:visible}
+  .hero h1{font-size:28px;margin:18px 0 6px}
+  .hero p{opacity:0.9}
+
+  /* Card / letter */
+  .card-area{margin-top:28px;display:flex;gap:18px;justify-content:center}
+  .letter{width:320px;height:200px;perspective:1200px}
+  .envelope{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.2,.9,.3,1);cursor:pointer}
+  .envelope.hover{transform:translateY(-10px)}
+  .envelope.open{transform:rotateX(-12deg) translateY(-40px) scale(1.02)}
+  .env-front{position:absolute;left:0;right:0;top:0;bottom:0;background:linear-gradient(180deg,#fff,#f3f3f3);border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;color:#222;padding:18px}
+  .env-inner{position:absolute;inset:12px;border-radius:6px;padding:18px;background:linear-gradient(180deg,#fff 0,#fff 100%);transform:translateZ(-40px)}
+  .env-stamp{position:absolute;right:12px;top:12px;font-weight:700;color:#333}
+  .envelope .peek{position:absolute;left:24px;right:24px;top:30px;height:48px;background:linear-gradient(90deg,#ffefc6,#fff);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#333;font-weight:600;transform-origin:center;}
+
+  /* Teachers list modal */
+  .teachers-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(0deg,rgba(3,6,12,.6),rgba(3,6,12,.85));z-index:60;backdrop-filter:blur(4px);visibility:hidden;opacity:0;transition:all .25s}
+  .teachers-modal.show{visibility:visible;opacity:1}
+  .modal-card{background:linear-gradient(180deg,#fff,#f8f8f8);color:#111;padding:18px;border-radius:12px;max-width:920px;width:92%;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+  .teacher-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .teacher-item{background:#fff;border-radius:10px;padding:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .teacher-item img{width:100%;height:120px;object-fit:cover;border-radius:8px}
+  .close-x{position:absolute;right:18px;top:18px;cursor:pointer}
+
+  /* Teacher page */
+  section.teacher{min-height:100vh;padding:80px 24px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
+  .teacher-header{display:flex;gap:18px;align-items:center;max-width:1000px;margin:0 auto}
+  .teacher-header img{width:160px;height:160px;border-radius:12px;object-fit:cover;box-shadow:0 8px 30px rgba(0,0,0,.45)}
+  .teacher-body{max-width:1000px;margin:26px auto;display:grid;grid-template-columns:1fr 360px;gap:20px}
+  .gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .gallery img{width:100%;height:220px;object-fit:cover;border-radius:12px;opacity:0;transform:translateY(18px);transition:all .6s}
+  .gallery img.visible{opacity:1;transform:none}
+  .messages{background:rgba(255,255,255,0.03);padding:12px;border-radius:10px;height:520px;overflow:auto}
+  .msg{background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));padding:10px;border-radius:8px;margin-bottom:8px}
+  .msg b{display:block}
+  .form{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+  input,textarea{width:100%;padding:8px;border-radius:8px;border:0;background:rgba(255,255,255,0.04);color:#fff}
+  .submit{background:linear-gradient(90deg,var(--accent),#ff9db0);border:0;padding:10px;border-radius:8px;color:#111;font-weight:700;cursor:pointer}
+
+  /* fireworks canvas */
+  canvas#fw{position:fixed;inset:0;pointer-events:none;z-index:20}
+  audio{display:none}
+
+  footer{padding:18px;text-align:center;color:rgba(255,255,255,0.6)}
+
+  @media(max-width:900px){.teacher-body{grid-template-columns:1fr} .teacher-header{flex-direction:column;align-items:center}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Lớp 9/4 — Tri ân Thầy Cô 20/11</div>
+  <div class="controls">
+    <button class="btn" id="musicToggle">Nhạc nền ▶</button>
+    <button class="btn" id="openTeachers">Danh sách Thầy Cô</button>
+  </div>
+</header>
+<canvas id="fw"></canvas>
+<main>
+  <section class="landing" id="landing">
+    <div class="hero">
+      <div class="heart-wrap">
+        <!-- SVG heart with text-path to draw letters along path -->
+        <svg class="heart" viewBox="0 0 200 200" aria-hidden>
+          <defs>
+            <path id="heartPath" d="M100 30 C120 5,170 20,170 65 C170 110,100 150,100 150 C100 150,30 110,30 65 C30 20,80 5,100 30 Z" />
+          </defs>
+          <text font-family="Poppins" font-weight="700" font-size="6">
+            <textPath id="tpath" xlink:href="#heartPath" startOffset="0%">
+              Chúc mừng ngày Nhà Giáo Việt Nam 20/11 — Thân quý từ lớp 9/4 • Chúc thầy cô sức khỏe • Thầy cô là người truyền cảm hứng •
+            </textPath>
+          </text>
+          <path id="strokeHeart" d="M100 30 C120 5,170 20,170 65 C170 110,100 150,100 150 C100 150,30 110,30 65 C30 20,80 5,100 30 Z" stroke="rgba(255,107,129,0.95)" stroke-width="2.6" fill="transparent" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h1>Tri ân Thầy Cô — Lớp 9/4</h1>
+        <p>Chúc mừng Ngày Nhà Giáo Việt Nam 20/11 — Mỗi lời chúc gửi gắm yêu thương.</p>
+
+        <div class="card-area">
+          <div class="letter" id="letter">
+            <div class="envelope" id="envelope">
+              <div class="env-front">
+                <div class="peek">Bức thư yêu thương — Nhấn để mở</div>
+                <div class="env-stamp">20/11</div>
+              </div>
+              <div class="env-inner" id="innerNote" style="display:none">
+                <div style="font-weight:700;margin-bottom:6px">Chọn thầy/cô nhận thiệp</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <!-- small preview photos created dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Teacher pages will be shown by hash navigation -->
+  <div id="teachersContainer"></div>
+
+  <footer>Trang web mẫu — Thay ảnh giáo viên trong /img/teacher-{id}-{n}.jpg hoặc cập nhật url trong mã.</footer>
+</main>
+
+<!-- background music (switch on/off) -->
+<audio id="bgmusic" loop>
+  <!-- user replace source.mp3 with actual file path -->
+  <source src="/audio/background.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+
+<script>
+// ----- Configuration: change teacher names and image paths here -----
+const TEACHERS = [
+  {id:'gv1', name:'Nguyễn Thị A', title:'GV Toán', cover:'/img/gv1_cover.jpg'},
+  {id:'gv2', name:'Trần Văn B', title:'GV Văn', cover:'/img/gv2_cover.jpg'},
+  {id:'gv3', name:'Phạm Thị C', title:'GV Lý', cover:'/img/gv3_cover.jpg'},
+  {id:'gv4', name:'Lê Văn D', title:'GV Hóa', cover:'/img/gv4_cover.jpg'},
+  {id:'gv5', name:'Hoàng Thị E', title:'GV Sinh', cover:'/img/gv5_cover.jpg'},
+  {id:'gv6', name:'Đỗ Văn F', title:'GV Sử', cover:'/img/gv6_cover.jpg'},
+  {id:'gv7', name:'Vũ Thị G', title:'GV Địa', cover:'/img/gv7_cover.jpg'},
+  {id:'gv8', name:'Bùi Văn H', title:'GV Anh', cover:'/img/gv8_cover.jpg'}
+];
+// For each teacher, the gallery images are expected at /img/{id}-1.jpg ... -4.jpg
+
+// ----- Heart draw animation -----
+const stroke = document.getElementById('strokeHeart');
+function animateHeart(){
+  const len = stroke.getTotalLength();
+  stroke.style.strokeDasharray = len;
+  stroke.style.strokeDashoffset = len;
+  stroke.getBoundingClientRect();
+  // draw
+  stroke.animate([{strokeDashoffset: len},{strokeDashoffset:0}],{duration:2200,fill:'forwards',easing:'ease-out'}).onfinish = ()=>{
+    // after draw, reveal note peek
+    document.getElementById('envelope').classList.add('open');
+    // show inner note to pick teacher
+    setTimeout(()=>{
+      document.getElementById('innerNote').style.display='block';
+      populateInnerNote();
+    },400);
+  }
+}
+
+// textPath slow scroll effect (keeps moving text around heart)
+const tpath = document.querySelector('#tpath');
+let offset = 0;
+setInterval(()=>{offset = (offset + 0.2) % 100; tpath.setAttribute('startOffset', offset+'%');},60);
+
+// ----- Envelope interactions -----
+const envelope = document.getElementById('envelope');
+envelope.addEventListener('mouseenter',()=>envelope.classList.add('hover'));
+envelope.addEventListener('mouseleave',()=>envelope.classList.remove('hover'));
+envelope.addEventListener('click',()=>{
+  // open modal of teachers
+  showTeachersModal();
+});
+
+// ----- Teachers modal -----
+const modal = document.createElement('div'); modal.className='teachers-modal';
+modal.innerHTML = `
+  <div class="modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h3>Chọn Thầy/Cô nhận thiệp</h3>
+      <div class="close-x" id="closeModal">✕</div>
+    </div>
+    <div class="teacher-grid" id="teacherGrid"></div>
+  </div>`;
+document.body.appendChild(modal);
+modal.querySelector('#closeModal').addEventListener('click',()=>modal.classList.remove('show'));
+
+function populateInnerNote(){
+  const inner = document.getElementById('innerNote');
+  const row = inner.querySelector('div');
+  row.innerHTML = '';
+  TEACHERS.forEach(t=>{
+    const item = document.createElement('div'); item.style.width='64px'; item.style.margin='6px'; item.style.textAlign='center';
+    const im = document.createElement('img'); im.src = t.cover; im.alt = t.name; im.style.width='64px'; im.style.height='64px'; im.style.borderRadius='6px'; im.style.objectFit='cover';
+    const lb = document.createElement('div'); lb.textContent = t.name; lb.style.fontSize='11px'; lb.style.color='#222';
+    item.appendChild(im); item.appendChild(lb);
+    item.addEventListener('click',()=>{ navigateToTeacher(t.id); modal.classList.remove('show');});
+    row.appendChild(item);
+  });
+}
+
+function showTeachersModal(){
+  const grid = modal.querySelector('#teacherGrid');
+  grid.innerHTML='';
+  TEACHERS.forEach(t=>{
+    const item = document.createElement('div'); item.className='teacher-item';
+    const img = document.createElement('img'); img.src=t.cover; img.alt=t.name; img.onerror = ()=>{img.style.background='#ddd'};
+    const nm = document.createElement('div'); nm.textContent = t.name+' — '+t.title; nm.style.fontWeight=600; nm.style.fontSize='13px'; nm.style.color='#111';
+    item.appendChild(img); item.appendChild(nm);
+    item.addEventListener('click',()=>{ modal.classList.remove('show'); navigateToTeacher(t.id); });
+    grid.appendChild(item);
+  });
+  modal.classList.add('show');
+}
+
+// ----- Navigation and teacher pages generation -----
+const container = document.getElementById('teachersContainer');
+function buildTeacherPages(){
+  TEACHERS.forEach(t => {
+    const sec = document.createElement('section'); sec.className='teacher'; sec.id = t.id;
+    sec.innerHTML = `
+      <div class="teacher-header">
+        <img src="${t.cover}" alt="${t.name}" onerror="this.style.background='#222'"/>
+        <div>
+          <h2 style="margin:0">${t.name}</h2>
+          <div style="opacity:.9">${t.title}</div>
+          <div style="margin-top:8px;color:rgba(255,255,255,0.75)">Các lời chúc từ lớp 9/4</div>
+        </div>
+      </div>
+      <div class="teacher-body">
+        <div>
+          <div class="gallery" id="gallery-${t.id}"></div>
+          <div style="margin-top:12px;color:rgba(255,255,255,0.7);font-size:13px">Kéo trang để xem ảnh - ảnh sẽ xuất hiện khi tới phần tương ứng.</div>
+        </div>
+        <aside>
+          <div class="messages" id="msgs-${t.id}"></div>
+          <form class="form" id="form-${t.id}" onsubmit="return false;">
+            <input placeholder="Tên bạn" id="name-${t.id}" required />
+            <textarea placeholder="Lời chúc (tối đa 300 ký tự)" id="text-${t.id}" maxlength="300" rows="4"></textarea>
+            <button class="submit" data-id="${t.id}">Gửi lời chúc</button>
+          </form>
+        </aside>
+      </div>`;
+    container.appendChild(sec);
+
+    // populate gallery
+    const g = sec.querySelector('#gallery-'+t.id);
+    for(let i=1;i<=4;i++){
+      const im = document.createElement('img');
+      im.dataset.src = `/img/${t.id}-${i}.jpg`;
+      im.alt = `${t.name} ${i}`;
+      g.appendChild(im);
     }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter, Poppins, system-ui, Arial;background:linear-gradient(120deg,var(--bg1),var(--bg2));color:#fff}
+  });
+}
 
-    /* ---------- GLOBAL LAYERS ---------- */
-    .stage{position:relative;width:100%;height:100vh;overflow:hidden}
-    canvas.fireworks{position:absolute;inset:0;z-index:5;pointer-events:none}
-    .bokeh{position:absolute;inset:0;z-index:2;pointer-events:none;background-image:radial-gradient(circle at 20% 30%, rgba(255,255,255,0.03) 0, transparent 20%),radial-gradient(circle at 80% 70%, rgba(255,255,255,0.02) 0, transparent 18%)}
+// Save/load messages using localStorage
+function loadMessages(id){
+  const key = 'msgs_'+id; const raw = localStorage.getItem(key);
+  try{ return raw?JSON.parse(raw):[]; }catch(e){return[]}
+}
+function saveMessages(id,arr){ localStorage.setItem('msgs_'+id, JSON.stringify(arr)); }
+function renderMessages(id){
+  const box = document.getElementById('msgs-'+id); if(!box) return;
+  const arr = loadMessages(id);
+  box.innerHTML = arr.reverse().map(m=>`<div class="msg"><b>${escapeHtml(m.name)}</b><div>${escapeHtml(m.text)}</div><div style="font-size:11px;opacity:.6;margin-top:6px">${new Date(m.t).toLocaleString()}</div></div>`).join('') || '<div style="opacity:.7">Chưa có lời chúc nào. Hãy là người đầu tiên!</div>';
+}
 
-    /* ---------- FLOWER-BLOOM HEART INTRO ---------- */
-    #intro{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:10}
-    .heart-wrap{position:relative;width:420px;height:280px;display:flex;align-items:center;justify-content:center}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
 
-    /* flower petals built with CSS shapes */
-    .petal{position:absolute;width:160px;height:200px;background:linear-gradient(180deg,#ff92b6,#ff5c8a);border-radius:80% 80% 40% 40%;transform-origin:center bottom;filter:drop-shadow(0 10px 25px rgba(255,90,120,0.18));opacity:0}
-    .petal.p1{transform:translate(-80px,-30px) rotate(-20deg) scale(0.6)}
-    .petal.p2{transform:translate(80px,-30px) rotate(20deg) scale(0.6)}
-    .petal.p3{transform:translate(0px,10px) rotate(0deg) scale(0.6)}
-    .petal.p4{transform:translate(-40px,40px) rotate(-45deg) scale(0.55)}
-    .petal.p5{transform:translate(40px,40px) rotate(45deg) scale(0.55)}
+// attach form events
+function attachFormHandlers(){
+  TEACHERS.forEach(t=>{
+    const form = document.getElementById('form-'+t.id);
+    form.querySelector('.submit').addEventListener('click',()=>{
+      const name = form.querySelector('#name-'+t.id).value.trim() || 'Bạn ẩn danh';
+      const text = form.querySelector('#text-'+t.id).value.trim();
+      if(!text){ alert('Vui lòng viết lời chúc.'); return; }
+      const arr = loadMessages(t.id);
+      arr.push({name,text,t:Date.now()});
+      saveMessages(t.id,arr);
+      form.querySelector('#name-'+t.id).value=''; form.querySelector('#text-'+t.id).value='';
+      renderMessages(t.id);
+      // small celebratory firework
+      launchSmallFirework();
+    });
+  });
+}
 
-    /* bloom animations */
-    .petal.animate{animation:bloom 1.2s forwards cubic-bezier(.2,.9,.1,1)}
+// Lazy reveal gallery images on scroll
+function setupGalleryObserver(){
+  const imgs = document.querySelectorAll('.gallery img');
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(ent=>{
+      if(ent.isIntersecting){
+        const img = ent.target; img.src = img.dataset.src; img.classList.add('visible');
+        io.unobserve(img);
+      }
+    });
+  },{threshold:0.15});
+  imgs.forEach(i=>io.observe(i));
+}
+
+// navigation
+function navigateToTeacher(id){
+  location.hash = id;
+  setTimeout(()=>{
+    const el = document.getElementById(id); if(el){window.scrollTo({top:el.offsetTop-70,behavior:'smooth'})}
+  },80);
+}
+
+window.addEventListener('hashchange',()=>{
+  const id = location.hash.replace('#',''); if(!id) return;
+  const el = document.getElementById(id); if(el) window.scrollTo({top:el.offsetTop-70,behavior:'smooth'});
+});
+
+// ----- Fireworks (simple) -----
+const canvas = document.getElementById('fw'); const ctx = canvas.getContext('2d'); let W=innerWidth,H=innerHeight; canvas.width=W;canvas.height=H; window.addEventListener('resize',()=>{W=innerWidth;H=innerHeight;canvas.width=W;canvas.height=H});
+let particles = [];
+function rand(a,b){return a + Math.random()*(b-a)}
+function launch(x,y){
+  const hue = Math.floor(rand(0,360));
+  const count = 30 + Math.floor(Math.random()*40);
+  for(let i=0;i<count;i++){particles.push({x,y,dx:Math.cos(i/count*Math.PI*2)*rand(1,6),dy:Math.sin(i/count*Math.PI*2)*rand(1,6),life:rand(700,1600),t:0,hue})}
+}
+function launchSmallFirework(){launch(rand(200, W-200), rand(120, H-200));}
+function animateFW(ts){ctx.clearRect(0,0,W,H); for(let i=particles.length-1;i>=0;i--){const p=particles[i]; p.t+=16; p.x += p.dx; p.y += p.dy + 0.12*p.t/100; const alpha = 1 - p.t/p.life; if(alpha<=0){particles.splice(i,1);continue;} ctx.beginPath(); ctx.globalCompositeOperation='lighter'; ctx.fillStyle = `hsla(${p.hue},80%,60%,${alpha})`; ctx.arc(p.x,p.y,Math.max(1,3*alpha),0,Math.PI*2); ctx.fill(); } requestAnimationFrame(animateFW);} requestAnimationFrame(animateFW);
+
+// click to create big firework
+canvas.addEventListener('click',(e)=>{launch(e.clientX,e.clientY)});
+
+// small automatic fireworks every so often on landing
+setInterval(()=>{ if(location.hash) return; launch(rand(120,W-120), rand(120,H-200)) }, 3500);
+
+// music control
+const music = document.getElementById('bgmusic'); const musicToggle = document.getElementById('musicToggle');
+musicToggle.addEventListener('click',()=>{
+  if(music.paused){ music.play().catch(()=>{}); musicToggle.textContent='Nhạc nền ⏸'; } else { music.pause(); musicToggle.textContent='Nhạc nền ▶'; }
+});
+
+// small fireworks helper called on send
+
+// on load
+buildTeacherPages(); attachFormHandlers(); setupGalleryObserver();
+TEACHERS.forEach(t=>renderMessages(t.id));
+
+// animate heart after small delay
+setTimeout(animateHeart,800);
+
+// expose modal open button
+document.getElementById('openTeachers').addEventListener('click',showTeachersModal);
+
+// helper to launch a bigger celebratory when form submitted (used above)
+function launchCelebration(){ for(let i=0;i<6;i++){ setTimeout(()=>launch(rand(200,W-200), rand(120,H-200)), i*350); } }
+
+// expose small launch
+window.launchSmallFirework = launchSmallFirework;
+
+</script>
+</body>
+</html>
     .petal.animate.delay1{animation-delay:0.15s}
     .petal.animate.delay2{animation-delay:0.28s}
     .petal.animate.delay3{animation-delay:0.4s}
@@ -364,3 +693,4 @@
   </script>
 </body>
 </html>
+
