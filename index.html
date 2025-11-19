@@ -429,12 +429,7 @@
     <button id="audioToggle">🔊 Bật nhạc nền</button>
     <a href="admin.html">🏠</a>
   </div>
-
-  <audio id="bgAudio" loop>
-    <source src="assets/bg-music.mp3" type="audio/mpeg">
-    Trình duyệt của bạn không hỗ trợ thẻ audio.
-  </audio>
-
+<audio id="bgAudio" loop src="assets/bg-music.mp3"></audio>
 
 
   <script type="module">
@@ -732,17 +727,30 @@
     /*****************************
      * Audio background toggle
      *****************************/
+    const audioToggle = document.getElementById('audioToggle');
+    const bgAudio = document.getElementById('bgAudio');
+    
+    // Cập nhật icon theo trạng thái
+    function updateAudioBtn() {
+      audioToggle.textContent = bgAudio.paused ? '🔊 Bật nhạc nền' : '🔇 Tắt nhạc nền';
+    }
+    
     audioToggle.addEventListener('click', async () => {
       try {
         if (bgAudio.paused) {
+          // Chỉ play khi chưa phát
           await bgAudio.play();
         } else {
           bgAudio.pause();
         }
+        updateAudioBtn();
       } catch (e) {
         console.log('Play bị ngắt:', e);
       }
     });
+    
+    // Khởi tạo icon đúng trạng thái lúc load
+    updateAudioBtn();
 
 
     /*****************************
@@ -838,4 +846,5 @@
 </body>
 
 </html>
+
 
