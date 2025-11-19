@@ -432,7 +432,6 @@
           maxlength="800"></textarea> <label><input type="checkbox" id="hideName"> Ẩn tên</label> <button class="btn"
           id="sendWish">Gửi lời chúc</button> </div>
     </div>
-    <small style="color:#ccc;margin-top:6px">Bài gửi sẽ được admin duyệt trước khi hiển thị</small>
   </div>
   </div>
   </div>
@@ -562,7 +561,7 @@
         gallery.appendChild(img);
       });
       // show wishes for this teacher
-      renderWishesForTeacher(id);
+      renderWishesForTeacherRealtime(id);
       // show modal
       teacherView.style.display = 'flex';
       teacherView.setAttribute('aria-hidden', 'false');
@@ -677,7 +676,7 @@
       const all = loadLocal();
       all.push(wish);
       saveLocal(all);
-      renderWishesForTeacher(teacherId);
+      renderWishesForTeacherRealtime(teacherId);
       $('#inputContent').value = '';
 
       // try submit to server if endpoint set
