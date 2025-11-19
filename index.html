@@ -732,9 +732,6 @@
     /*****************************
      * Audio background toggle
      *****************************/
-    const audioToggle = document.getElementById('audioToggle');
-    const bgAudio = document.getElementById('bgAudio');
-
     audioToggle.addEventListener('click', async () => {
       try {
         if (bgAudio.paused) {
@@ -746,6 +743,7 @@
         console.log('Play bị ngắt:', e);
       }
     });
+
 
     /*****************************
      * Fireworks canvas (simple)
@@ -840,3 +838,4 @@
 </body>
 
 </html>
+
