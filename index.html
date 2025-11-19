@@ -9,25 +9,7 @@
     rel="stylesheet">
   <!-- Firebase App (core) SDK -->
   <script type="module">
-    // import từ CDN
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCBOxu2m8gBVudjy8tUUPIji7COaMFUKMM",
-      authDomain: "web20thang11.firebaseapp.com",
-      projectId: "web20thang11",
-      storageBucket: "web20thang11.firebasestorage.app",
-      messagingSenderId: "876267619684",
-      appId: "1:876267619684:web:2238ef31aacf8a7e966671",
-      measurementId: "G-8J68YJC7F1"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    window._db = db;
-    window._fs = { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp };
   </script>
 
   <style>
@@ -430,8 +412,9 @@
 
       <div class="wish-form"> <input id="inputName" placeholder="Tên (hoặc để trống để ẩn tên)"> <input id="inputClass"
           placeholder="Lớp, ví dụ: 9/4"> <textarea id="inputContent" rows="4" placeholder="Viết lời chúc..."
-          maxlength="800"></textarea> <label><input type="checkbox" id="hideName"> Ẩn tên</label> <button class="btn"
-          id="sendWish">Gửi lời chúc</button> </div>
+          maxlength="800"></textarea> <label><input type="checkbox" id="hideName"> Ẩn tên</label>
+        <button class="btn" id="sendWish">Gửi lời chúc</button>
+      </div>
     </div>
   </div>
   </div>
@@ -454,7 +437,40 @@
 
 
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
+
+    // Firestore
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      serverTimestamp,
+      query,
+      where,
+      orderBy,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCBOxu2m8gBVudjy8tUUPIji7COaMFUKMM",
+      authDomain: "web20thang11.firebaseapp.com",
+      projectId: "web20thang11",
+      storageBucket: "web20thang11.firebasestorage.app",
+      messagingSenderId: "876267619684",
+      appId: "1:876267619684:web:2238ef31aacf8a7e966671",
+      measurementId: "G-8J68YJC7F1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+
+    const db = getFirestore(app);
+
+    // expose for your script
+    window._db = db;
+    window._fs = { collection, addDoc, serverTimestamp, query, where, orderBy, onSnapshot };
     /*****************************
      * CONFIG
      *****************************/
@@ -668,12 +684,13 @@
     }
 
 
-    // send wish handler
+
+    // ---- gửi lời chúc ----
     document.getElementById('sendWish').addEventListener('click', async () => {
-      const name = $('#inputName').value.trim();
-      const klass = $('#inputClass').value.trim();
-      const content = $('#inputContent').value.trim();
-      const hidden = $('#hideName').checked;
+      const name = document.getElementById('inputName').value.trim();
+      const klass = document.getElementById('inputClass').value.trim();
+      const content = document.getElementById('inputContent').value.trim();
+      const hidden = document.getElementById('hideName').checked;
       const teacherId = location.hash.replace('#', '').split('=')[1] || null;
       if (!teacherId) { alert('Lỗi: không xác định thầy/cô'); return; }
       if (content.length < 4) { alert('Lời chúc quá ngắn'); return; }
@@ -684,19 +701,20 @@
         klass: klass || '',
         content,
         hidden,
-        ts: serverTimestamp(), // dùng timestamp của Firestore
-        status: "pending",     // luôn để pending để admin duyệt
+        ts: window._fs.serverTimestamp(), // giờ chắc chắn tồn tại
+        status: "pending",
       };
 
       try {
-        await addDoc(collection(db, "wishes"), wish);
+        await window._fs.addDoc(window._fs.collection(window._db, "wishes"), wish);
         alert('Đã gửi lời chúc, chờ admin duyệt.');
-        $('#inputContent').value = '';
+        document.getElementById('inputContent').value = '';
       } catch (e) {
         console.error(e);
         alert('Gửi lời chúc thất bại, thử lại sau.');
       }
     });
+
 
     /*****************************
      * Audio background toggle
