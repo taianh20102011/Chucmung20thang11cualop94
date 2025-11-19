@@ -76,24 +76,24 @@
         const provider = new GoogleAuthProvider();
 
         /* THAY EMAIL ADMIN CỦA BẠN */
-        const ADMIN_EMAIL = "nguoitao.web@gmail.com";
+        const ADMIN_EMAIL = "phamngoctaianh6@gmail.com";
 
         /* ===================== AUTH CHECK ===================== */
         onAuthStateChanged(auth, user => {
             if (!user) {
-                signInWithPopup(auth, provider);
+                signInWithRedirect(auth, provider);
                 return;
             }
-
             if (user.email !== ADMIN_EMAIL) {
                 alert("Bạn không có quyền truy cập trang admin!");
                 window.location.href = "index.html";
                 return;
             }
-
             console.log("Đăng nhập admin:", user.email);
             loadPending();
+            loadApproved(); // thêm dòng này
         });
+
         function loadApproved() {
             const approvedList = document.getElementById("approvedList");
             const q = query(
@@ -140,9 +140,13 @@
                 });
             }
         }
+        const qNotify = query(
+            collection(db, "wishes"),
+            where("status", "==", "pending"),
+            orderBy("ts", "desc")
+        );
 
-        // Trong onSnapshot pending:
-        onSnapshot(q, snap => {
+        onSnapshot(qNotify, snap => {
             snap.docChanges().forEach(change => {
                 if (change.type === "added") {
                     notifyNewWish(change.doc.data());
@@ -154,13 +158,13 @@
         function loadPending() {
             const list = document.getElementById("pendingList");
 
-            const q = query(
+            const qPending = query(
                 collection(db, "wishes"),
                 where("status", "==", "pending"),
                 orderBy("ts", "desc")
             );
 
-            onSnapshot(q, snap => {
+            onSnapshot(qPending, snap => {
                 list.innerHTML = "";
 
                 if (snap.empty) {
@@ -174,12 +178,12 @@
                     el.className = "card";
 
                     el.innerHTML = `
-                        <h3>${w.hidden ? "Ẩn tên" : w.name}</h3>
-                        <p><strong>GV:</strong> ${w.teacherId}</p>
-                        <p>${w.content}</p>
-                        <button class="approve">Duyệt</button>
-                        <button class="reject">Xóa</button>
-                    `;
+            <h3>${w.hidden ? "Ẩn tên" : w.name}</h3>
+            <p><strong>GV:</strong> ${w.teacherId}</p>
+            <p>${w.content}</p>
+            <button class="approve">Duyệt</button>
+            <button class="reject">Xóa</button>
+        `;
 
                     el.querySelector(".approve").onclick = async () => {
                         await updateDoc(doc(db, "wishes", d.id), {
@@ -196,11 +200,16 @@
                     list.appendChild(el);
                 });
             });
+
         }
+        document.getElementById("loginBtn").addEventListener("click", () => {
+            signInWithPopup(auth, provider).catch(err => console.error(err));
+        });
     </script>
 </head>
 
 <body>
+    <button id="loginBtn">Đăng nhập Google</button>
     <h2>Lời chúc đã duyệt</h2>
     <div id="approvedList"></div>
     <h1>Admin – Duyệt Lời Chúc</h1>
