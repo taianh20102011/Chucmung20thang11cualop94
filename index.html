@@ -384,7 +384,8 @@
           </svg>
           <div style="margin-top:10px">
             <div class="handwriting" id="handwriting">Chúc mừng Ngày Nhà Giáo Việt Nam 20/11 — Lớp 9/4</div>
-            <p style="opacity:0.9;margin-top:8px;color:rgb(51, 51, 42)">Một món quà nhỏ gửi đến các thầy cô — click vào phong thư
+            <p style="opacity:0.9;margin-top:8px;color:rgb(51, 51, 42)">Một món quà nhỏ gửi đến các thầy cô — click vào
+              phong thư
               để chọn tên thầy/cô.</p>
           </div>
         </div>
@@ -700,15 +701,16 @@
     /*****************************
      * Audio background toggle
      *****************************/
-    window.addEventListener('load', () => {
-      const bgAudio = document.getElementById('bgAudio');
+    window.addEventListener('click', firstClickPlay);
 
-      // bật tiếng lại sau 1 giây
-      setTimeout(() => {
-        bgAudio.muted = false;
-        bgAudio.volume = 1;
-      }, 1000);
-    });
+    function firstClickPlay() {
+      const bgAudio = document.getElementById('bgAudio');
+      bgAudio.muted = false;
+      bgAudio.volume = 1;
+      bgAudio.play();
+      window.removeEventListener('click', firstClickPlay);
+    }
+
 
 
     /*****************************
