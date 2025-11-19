@@ -443,6 +443,7 @@
   <!-- controls -->
   <div class="controls" aria-hidden="false">
     <button class="control-btn" id="openAll">🏠 Về trang chính</button>
+    <button id="audioToggle">🔊 Bật nhạc nền</button>
     <a href="admin.html">🏠</a>
   </div>
 
@@ -468,7 +469,7 @@
       { id: 'gv5', name: 'Thầy Trần Kim Thành', subject: 'Tiếng Anh', avatar: 'assets/GV5.jpg', photos: ['assets/GV5_1.jpg', 'assets/GV5_2.jpg', 'assets/GV5_3.jpg'] },
       { id: 'gv6', name: 'Thầy Nguyễn Huy Hiệp', subject: 'Khoa Học Tự Nhiên', avatar: 'assets/GV6.jpg', photos: ['assets/GV6_1.jpg'] },
       { id: 'gv7', name: 'Cô Nguyễn Thị Thanh Loan', subject: 'GDCD', avatar: 'assets/GV7.jpg', photos: ['assets/GV7_1.jpg', 'assets/GV7_2.jpg'] },
-      { id: 'gv8', name: 'Cô Nguyễn Thị Tri Tâm', subject: 'Tin Học', avatar: 'assets/GV8.jpg', photos: ['assets/GV8_1.jpg','assets/GV8_2.jpg','assets/GV8_3.jpg'] },
+      { id: 'gv8', name: 'Cô Nguyễn Thị Tri Tâm', subject: 'Tin Học', avatar: 'assets/GV8.jpg', photos: ['assets/GV8_1.jpg', 'assets/GV8_2.jpg', 'assets/GV8_3.jpg'] },
       { id: 'gv9', name: 'Thầy Nguyễn Điền Khắc Duy', subject: 'Lịch Sử - Địa Lý', avatar: 'assets/GV9.png', photos: ['assets/GV9_1.png'] },
       { id: 'gv10', name: 'Cô Lê Thị Hải Hưng', subject: 'Nghệ Thuật', avatar: 'assets/GV10.jpg', photos: [] },
       { id: 'gv11', name: 'Thầy Trần Việt Tuấn', subject: 'Giáo Dục Thể Chất', avatar: 'assets/GV11.png', photos: [] },
@@ -677,32 +678,25 @@
       if (!teacherId) { alert('Lỗi: không xác định thầy/cô'); return; }
       if (content.length < 4) { alert('Lời chúc quá ngắn'); return; }
 
-      const wish = { teacherId, name: name || '', klass: klass || '', content, hidden, ts: Date.now(), status: SHEET_ENDPOINT ? 'pending' : 'approved', id: 'w' + Date.now() };
+      const wish = {
+        teacherId,
+        name: name || '',
+        klass: klass || '',
+        content,
+        hidden,
+        ts: serverTimestamp(), // dùng timestamp của Firestore
+        status: "pending",     // luôn để pending để admin duyệt
+      };
 
-      // save locally for demo
-      const all = loadLocal();
-      all.push(wish);
-      saveLocal(all);
-      renderWishesForTeacherRealtime(teacherId);
-      $('#inputContent').value = '';
-
-      // try submit to server if endpoint set
-      if (SHEET_ENDPOINT) {
-        try {
-          const resp = await fetch(SHEET_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(wish) });
-          if (!resp.ok) throw new Error('Network');
-          alert('Đã gửi — chờ admin duyệt.');
-        } catch (e) {
-          console.warn('Gửi lên sheet lỗi', e);
-          alert('Lưu cục bộ thành công, gửi lên server thất bại.');
-        }
-      } else {
-        // in demo we auto-approve
-        alert('Lưu lời chúc (demo): đã hiển thị cục bộ. Để gửi thực tế, cấu hình SHEET_ENDPOINT trong code.');
+      try {
+        await addDoc(collection(db, "wishes"), wish);
+        alert('Đã gửi lời chúc, chờ admin duyệt.');
+        $('#inputContent').value = '';
+      } catch (e) {
+        console.error(e);
+        alert('Gửi lời chúc thất bại, thử lại sau.');
       }
     });
-
-    function escapeHtml(s) { return s.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]) }
 
     /*****************************
      * Audio background toggle
@@ -717,6 +711,17 @@
       window.removeEventListener('click', firstClickPlay);
     }
 
+    const audioToggle = document.getElementById('audioToggle');
+    const bgAudio = document.getElementById('bgAudio');
+    audioToggle.addEventListener('click', () => {
+      if (bgAudio.paused) {
+        bgAudio.play();
+        audioToggle.textContent = '🔇 Tắt nhạc';
+      } else {
+        bgAudio.pause();
+        audioToggle.textContent = '🔊 Bật nhạc';
+      }
+    });
 
 
     /*****************************
