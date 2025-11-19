@@ -1,696 +1,807 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Tri ân Thầy Cô 20/11 — Lớp 9/4</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;900&display=swap" rel="stylesheet">
-<style>
-  :root{--bg:#0b1220;--card:#fff;--accent:#ff6b81}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:'Poppins',system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;background:linear-gradient(180deg,#061021 0%, #0b1630 60%);color:#fff;min-height:100vh;}
-  header{position:fixed;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;z-index:30}
-  .brand{font-weight:700;letter-spacing:0.6px}
-  .controls{display:flex;gap:10px;align-items:center}
-  .btn{background:rgba(255,255,255,0.08);border:0;padding:8px 12px;border-radius:10px;color:#fff;cursor:pointer}
-  main{padding-top:84px}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tri ân 20/11 — Lớp 9/4</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Pacifico&display=swap"
+    rel="stylesheet">
+  <!-- Firebase App (core) SDK -->
+  <script type="module">
+    // import từ CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-  /* LANDING */
-  .landing{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-  .hero{width:100%;max-width:1100px;padding:40px;text-align:center}
-  .heart-wrap{display:flex;align-items:center;justify-content:center;flex-direction:column}
-  svg.heart{width:360px;height:360px;overflow:visible}
-  .hero h1{font-size:28px;margin:18px 0 6px}
-  .hero p{opacity:0.9}
+    const firebaseConfig = {
+      apiKey: "AIzaSyCBOxu2m8gBVudjy8tUUPIji7COaMFUKMM",
+      authDomain: "web20thang11.firebaseapp.com",
+      projectId: "web20thang11",
+      storageBucket: "web20thang11.firebasestorage.app",
+      messagingSenderId: "876267619684",
+      appId: "1:876267619684:web:2238ef31aacf8a7e966671",
+      measurementId: "G-8J68YJC7F1"
+    };
 
-  /* Card / letter */
-  .card-area{margin-top:28px;display:flex;gap:18px;justify-content:center}
-  .letter{width:320px;height:200px;perspective:1200px}
-  .envelope{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.2,.9,.3,1);cursor:pointer}
-  .envelope.hover{transform:translateY(-10px)}
-  .envelope.open{transform:rotateX(-12deg) translateY(-40px) scale(1.02)}
-  .env-front{position:absolute;left:0;right:0;top:0;bottom:0;background:linear-gradient(180deg,#fff,#f3f3f3);border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;color:#222;padding:18px}
-  .env-inner{position:absolute;inset:12px;border-radius:6px;padding:18px;background:linear-gradient(180deg,#fff 0,#fff 100%);transform:translateZ(-40px)}
-  .env-stamp{position:absolute;right:12px;top:12px;font-weight:700;color:#333}
-  .envelope .peek{position:absolute;left:24px;right:24px;top:30px;height:48px;background:linear-gradient(90deg,#ffefc6,#fff);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#333;font-weight:600;transform-origin:center;}
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  /* Teachers list modal */
-  .teachers-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(0deg,rgba(3,6,12,.6),rgba(3,6,12,.85));z-index:60;backdrop-filter:blur(4px);visibility:hidden;opacity:0;transition:all .25s}
-  .teachers-modal.show{visibility:visible;opacity:1}
-  .modal-card{background:linear-gradient(180deg,#fff,#f8f8f8);color:#111;padding:18px;border-radius:12px;max-width:920px;width:92%;box-shadow:0 12px 40px rgba(0,0,0,.5)}
-  .teacher-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-  .teacher-item{background:#fff;border-radius:10px;padding:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px}
-  .teacher-item img{width:100%;height:120px;object-fit:cover;border-radius:8px}
-  .close-x{position:absolute;right:18px;top:18px;cursor:pointer}
+    window._db = db;
+    window._fs = { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp };
+  </script>
 
-  /* Teacher page */
-  section.teacher{min-height:100vh;padding:80px 24px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
-  .teacher-header{display:flex;gap:18px;align-items:center;max-width:1000px;margin:0 auto}
-  .teacher-header img{width:160px;height:160px;border-radius:12px;object-fit:cover;box-shadow:0 8px 30px rgba(0,0,0,.45)}
-  .teacher-body{max-width:1000px;margin:26px auto;display:grid;grid-template-columns:1fr 360px;gap:20px}
-  .gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  .gallery img{width:100%;height:220px;object-fit:cover;border-radius:12px;opacity:0;transform:translateY(18px);transition:all .6s}
-  .gallery img.visible{opacity:1;transform:none}
-  .messages{background:rgba(255,255,255,0.03);padding:12px;border-radius:10px;height:520px;overflow:auto}
-  .msg{background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));padding:10px;border-radius:8px;margin-bottom:8px}
-  .msg b{display:block}
-  .form{margin-top:12px;display:flex;flex-direction:column;gap:8px}
-  input,textarea{width:100%;padding:8px;border-radius:8px;border:0;background:rgba(255,255,255,0.04);color:#fff}
-  .submit{background:linear-gradient(90deg,var(--accent),#ff9db0);border:0;padding:10px;border-radius:8px;color:#111;font-weight:700;cursor:pointer}
-
-  /* fireworks canvas */
-  canvas#fw{position:fixed;inset:0;pointer-events:none;z-index:20}
-  audio{display:none}
-
-  footer{padding:18px;text-align:center;color:rgba(255,255,255,0.6)}
-
-  @media(max-width:900px){.teacher-body{grid-template-columns:1fr} .teacher-header{flex-direction:column;align-items:center}}
-</style>
-</head>
-<body>
-<header>
-  <div class="brand">Lớp 9/4 — Tri ân Thầy Cô 20/11</div>
-  <div class="controls">
-    <button class="btn" id="musicToggle">Nhạc nền ▶</button>
-    <button class="btn" id="openTeachers">Danh sách Thầy Cô</button>
-  </div>
-</header>
-<canvas id="fw"></canvas>
-<main>
-  <section class="landing" id="landing">
-    <div class="hero">
-      <div class="heart-wrap">
-        <!-- SVG heart with text-path to draw letters along path -->
-        <svg class="heart" viewBox="0 0 200 200" aria-hidden>
-          <defs>
-            <path id="heartPath" d="M100 30 C120 5,170 20,170 65 C170 110,100 150,100 150 C100 150,30 110,30 65 C30 20,80 5,100 30 Z" />
-          </defs>
-          <text font-family="Poppins" font-weight="700" font-size="6">
-            <textPath id="tpath" xlink:href="#heartPath" startOffset="0%">
-              Chúc mừng ngày Nhà Giáo Việt Nam 20/11 — Thân quý từ lớp 9/4 • Chúc thầy cô sức khỏe • Thầy cô là người truyền cảm hứng •
-            </textPath>
-          </text>
-          <path id="strokeHeart" d="M100 30 C120 5,170 20,170 65 C170 110,100 150,100 150 C100 150,30 110,30 65 C30 20,80 5,100 30 Z" stroke="rgba(255,107,129,0.95)" stroke-width="2.6" fill="transparent" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <h1>Tri ân Thầy Cô — Lớp 9/4</h1>
-        <p>Chúc mừng Ngày Nhà Giáo Việt Nam 20/11 — Mỗi lời chúc gửi gắm yêu thương.</p>
-
-        <div class="card-area">
-          <div class="letter" id="letter">
-            <div class="envelope" id="envelope">
-              <div class="env-front">
-                <div class="peek">Bức thư yêu thương — Nhấn để mở</div>
-                <div class="env-stamp">20/11</div>
-              </div>
-              <div class="env-inner" id="innerNote" style="display:none">
-                <div style="font-weight:700;margin-bottom:6px">Chọn thầy/cô nhận thiệp</div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap">
-                  <!-- small preview photos created dynamically -->
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- Teacher pages will be shown by hash navigation -->
-  <div id="teachersContainer"></div>
-
-  <footer>Trang web mẫu — Thay ảnh giáo viên trong /img/teacher-{id}-{n}.jpg hoặc cập nhật url trong mã.</footer>
-</main>
-
-<!-- background music (switch on/off) -->
-<audio id="bgmusic" loop>
-  <!-- user replace source.mp3 with actual file path -->
-  <source src="/audio/background.mp3" type="audio/mpeg">
-  Your browser does not support the audio element.
-</audio>
-
-<script>
-// ----- Configuration: change teacher names and image paths here -----
-const TEACHERS = [
-  {id:'gv1', name:'Nguyễn Thị A', title:'GV Toán', cover:'/img/gv1_cover.jpg'},
-  {id:'gv2', name:'Trần Văn B', title:'GV Văn', cover:'/img/gv2_cover.jpg'},
-  {id:'gv3', name:'Phạm Thị C', title:'GV Lý', cover:'/img/gv3_cover.jpg'},
-  {id:'gv4', name:'Lê Văn D', title:'GV Hóa', cover:'/img/gv4_cover.jpg'},
-  {id:'gv5', name:'Hoàng Thị E', title:'GV Sinh', cover:'/img/gv5_cover.jpg'},
-  {id:'gv6', name:'Đỗ Văn F', title:'GV Sử', cover:'/img/gv6_cover.jpg'},
-  {id:'gv7', name:'Vũ Thị G', title:'GV Địa', cover:'/img/gv7_cover.jpg'},
-  {id:'gv8', name:'Bùi Văn H', title:'GV Anh', cover:'/img/gv8_cover.jpg'}
-];
-// For each teacher, the gallery images are expected at /img/{id}-1.jpg ... -4.jpg
-
-// ----- Heart draw animation -----
-const stroke = document.getElementById('strokeHeart');
-function animateHeart(){
-  const len = stroke.getTotalLength();
-  stroke.style.strokeDasharray = len;
-  stroke.style.strokeDashoffset = len;
-  stroke.getBoundingClientRect();
-  // draw
-  stroke.animate([{strokeDashoffset: len},{strokeDashoffset:0}],{duration:2200,fill:'forwards',easing:'ease-out'}).onfinish = ()=>{
-    // after draw, reveal note peek
-    document.getElementById('envelope').classList.add('open');
-    // show inner note to pick teacher
-    setTimeout(()=>{
-      document.getElementById('innerNote').style.display='block';
-      populateInnerNote();
-    },400);
-  }
-}
-
-// textPath slow scroll effect (keeps moving text around heart)
-const tpath = document.querySelector('#tpath');
-let offset = 0;
-setInterval(()=>{offset = (offset + 0.2) % 100; tpath.setAttribute('startOffset', offset+'%');},60);
-
-// ----- Envelope interactions -----
-const envelope = document.getElementById('envelope');
-envelope.addEventListener('mouseenter',()=>envelope.classList.add('hover'));
-envelope.addEventListener('mouseleave',()=>envelope.classList.remove('hover'));
-envelope.addEventListener('click',()=>{
-  // open modal of teachers
-  showTeachersModal();
-});
-
-// ----- Teachers modal -----
-const modal = document.createElement('div'); modal.className='teachers-modal';
-modal.innerHTML = `
-  <div class="modal-card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <h3>Chọn Thầy/Cô nhận thiệp</h3>
-      <div class="close-x" id="closeModal">✕</div>
-    </div>
-    <div class="teacher-grid" id="teacherGrid"></div>
-  </div>`;
-document.body.appendChild(modal);
-modal.querySelector('#closeModal').addEventListener('click',()=>modal.classList.remove('show'));
-
-function populateInnerNote(){
-  const inner = document.getElementById('innerNote');
-  const row = inner.querySelector('div');
-  row.innerHTML = '';
-  TEACHERS.forEach(t=>{
-    const item = document.createElement('div'); item.style.width='64px'; item.style.margin='6px'; item.style.textAlign='center';
-    const im = document.createElement('img'); im.src = t.cover; im.alt = t.name; im.style.width='64px'; im.style.height='64px'; im.style.borderRadius='6px'; im.style.objectFit='cover';
-    const lb = document.createElement('div'); lb.textContent = t.name; lb.style.fontSize='11px'; lb.style.color='#222';
-    item.appendChild(im); item.appendChild(lb);
-    item.addEventListener('click',()=>{ navigateToTeacher(t.id); modal.classList.remove('show');});
-    row.appendChild(item);
-  });
-}
-
-function showTeachersModal(){
-  const grid = modal.querySelector('#teacherGrid');
-  grid.innerHTML='';
-  TEACHERS.forEach(t=>{
-    const item = document.createElement('div'); item.className='teacher-item';
-    const img = document.createElement('img'); img.src=t.cover; img.alt=t.name; img.onerror = ()=>{img.style.background='#ddd'};
-    const nm = document.createElement('div'); nm.textContent = t.name+' — '+t.title; nm.style.fontWeight=600; nm.style.fontSize='13px'; nm.style.color='#111';
-    item.appendChild(img); item.appendChild(nm);
-    item.addEventListener('click',()=>{ modal.classList.remove('show'); navigateToTeacher(t.id); });
-    grid.appendChild(item);
-  });
-  modal.classList.add('show');
-}
-
-// ----- Navigation and teacher pages generation -----
-const container = document.getElementById('teachersContainer');
-function buildTeacherPages(){
-  TEACHERS.forEach(t => {
-    const sec = document.createElement('section'); sec.className='teacher'; sec.id = t.id;
-    sec.innerHTML = `
-      <div class="teacher-header">
-        <img src="${t.cover}" alt="${t.name}" onerror="this.style.background='#222'"/>
-        <div>
-          <h2 style="margin:0">${t.name}</h2>
-          <div style="opacity:.9">${t.title}</div>
-          <div style="margin-top:8px;color:rgba(255,255,255,0.75)">Các lời chúc từ lớp 9/4</div>
-        </div>
-      </div>
-      <div class="teacher-body">
-        <div>
-          <div class="gallery" id="gallery-${t.id}"></div>
-          <div style="margin-top:12px;color:rgba(255,255,255,0.7);font-size:13px">Kéo trang để xem ảnh - ảnh sẽ xuất hiện khi tới phần tương ứng.</div>
-        </div>
-        <aside>
-          <div class="messages" id="msgs-${t.id}"></div>
-          <form class="form" id="form-${t.id}" onsubmit="return false;">
-            <input placeholder="Tên bạn" id="name-${t.id}" required />
-            <textarea placeholder="Lời chúc (tối đa 300 ký tự)" id="text-${t.id}" maxlength="300" rows="4"></textarea>
-            <button class="submit" data-id="${t.id}">Gửi lời chúc</button>
-          </form>
-        </aside>
-      </div>`;
-    container.appendChild(sec);
-
-    // populate gallery
-    const g = sec.querySelector('#gallery-'+t.id);
-    for(let i=1;i<=4;i++){
-      const im = document.createElement('img');
-      im.dataset.src = `/img/${t.id}-${i}.jpg`;
-      im.alt = `${t.name} ${i}`;
-      g.appendChild(im);
+  <style>
+    :root {
+      --bg1: #1b1b2f;
+      --bg2: #2b2a4a;
+      --card: #fff;
+      --accent: #ff7a7a;
+      --glass: rgba(255, 255, 255, 0.06);
+      --card-radius: 16px;
     }
-  });
-}
 
-// Save/load messages using localStorage
-function loadMessages(id){
-  const key = 'msgs_'+id; const raw = localStorage.getItem(key);
-  try{ return raw?JSON.parse(raw):[]; }catch(e){return[]}
-}
-function saveMessages(id,arr){ localStorage.setItem('msgs_'+id, JSON.stringify(arr)); }
-function renderMessages(id){
-  const box = document.getElementById('msgs-'+id); if(!box) return;
-  const arr = loadMessages(id);
-  box.innerHTML = arr.reverse().map(m=>`<div class="msg"><b>${escapeHtml(m.name)}</b><div>${escapeHtml(m.text)}</div><div style="font-size:11px;opacity:.6;margin-top:6px">${new Date(m.t).toLocaleString()}</div></div>`).join('') || '<div style="opacity:.7">Chưa có lời chúc nào. Hãy là người đầu tiên!</div>';
-}
+    html,
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #FDE6EC, #F7DCE5, #FADDEB);
+      background-size: 400% 400%;
+      animation: pastelMove 18s ease infinite;
+      margin: 0;
+      padding: 0;
+    }
 
-function escapeHtml(s){return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
-
-// attach form events
-function attachFormHandlers(){
-  TEACHERS.forEach(t=>{
-    const form = document.getElementById('form-'+t.id);
-    form.querySelector('.submit').addEventListener('click',()=>{
-      const name = form.querySelector('#name-'+t.id).value.trim() || 'Bạn ẩn danh';
-      const text = form.querySelector('#text-'+t.id).value.trim();
-      if(!text){ alert('Vui lòng viết lời chúc.'); return; }
-      const arr = loadMessages(t.id);
-      arr.push({name,text,t:Date.now()});
-      saveMessages(t.id,arr);
-      form.querySelector('#name-'+t.id).value=''; form.querySelector('#text-'+t.id).value='';
-      renderMessages(t.id);
-      // small celebratory firework
-      launchSmallFirework();
-    });
-  });
-}
-
-// Lazy reveal gallery images on scroll
-function setupGalleryObserver(){
-  const imgs = document.querySelectorAll('.gallery img');
-  const io = new IntersectionObserver(entries=>{
-    entries.forEach(ent=>{
-      if(ent.isIntersecting){
-        const img = ent.target; img.src = img.dataset.src; img.classList.add('visible');
-        io.unobserve(img);
+    @keyframes pastelMove {
+      0% {
+        background-position: 0% 50%;
       }
-    });
-  },{threshold:0.15});
-  imgs.forEach(i=>io.observe(i));
-}
 
-// navigation
-function navigateToTeacher(id){
-  location.hash = id;
-  setTimeout(()=>{
-    const el = document.getElementById(id); if(el){window.scrollTo({top:el.offsetTop-70,behavior:'smooth'})}
-  },80);
-}
+      50% {
+        background-position: 100% 50%;
+      }
 
-window.addEventListener('hashchange',()=>{
-  const id = location.hash.replace('#',''); if(!id) return;
-  const el = document.getElementById(id); if(el) window.scrollTo({top:el.offsetTop-70,behavior:'smooth'});
-});
-
-// ----- Fireworks (simple) -----
-const canvas = document.getElementById('fw'); const ctx = canvas.getContext('2d'); let W=innerWidth,H=innerHeight; canvas.width=W;canvas.height=H; window.addEventListener('resize',()=>{W=innerWidth;H=innerHeight;canvas.width=W;canvas.height=H});
-let particles = [];
-function rand(a,b){return a + Math.random()*(b-a)}
-function launch(x,y){
-  const hue = Math.floor(rand(0,360));
-  const count = 30 + Math.floor(Math.random()*40);
-  for(let i=0;i<count;i++){particles.push({x,y,dx:Math.cos(i/count*Math.PI*2)*rand(1,6),dy:Math.sin(i/count*Math.PI*2)*rand(1,6),life:rand(700,1600),t:0,hue})}
-}
-function launchSmallFirework(){launch(rand(200, W-200), rand(120, H-200));}
-function animateFW(ts){ctx.clearRect(0,0,W,H); for(let i=particles.length-1;i>=0;i--){const p=particles[i]; p.t+=16; p.x += p.dx; p.y += p.dy + 0.12*p.t/100; const alpha = 1 - p.t/p.life; if(alpha<=0){particles.splice(i,1);continue;} ctx.beginPath(); ctx.globalCompositeOperation='lighter'; ctx.fillStyle = `hsla(${p.hue},80%,60%,${alpha})`; ctx.arc(p.x,p.y,Math.max(1,3*alpha),0,Math.PI*2); ctx.fill(); } requestAnimationFrame(animateFW);} requestAnimationFrame(animateFW);
-
-// click to create big firework
-canvas.addEventListener('click',(e)=>{launch(e.clientX,e.clientY)});
-
-// small automatic fireworks every so often on landing
-setInterval(()=>{ if(location.hash) return; launch(rand(120,W-120), rand(120,H-200)) }, 3500);
-
-// music control
-const music = document.getElementById('bgmusic'); const musicToggle = document.getElementById('musicToggle');
-musicToggle.addEventListener('click',()=>{
-  if(music.paused){ music.play().catch(()=>{}); musicToggle.textContent='Nhạc nền ⏸'; } else { music.pause(); musicToggle.textContent='Nhạc nền ▶'; }
-});
-
-// small fireworks helper called on send
-
-// on load
-buildTeacherPages(); attachFormHandlers(); setupGalleryObserver();
-TEACHERS.forEach(t=>renderMessages(t.id));
-
-// animate heart after small delay
-setTimeout(animateHeart,800);
-
-// expose modal open button
-document.getElementById('openTeachers').addEventListener('click',showTeachersModal);
-
-// helper to launch a bigger celebratory when form submitted (used above)
-function launchCelebration(){ for(let i=0;i<6;i++){ setTimeout(()=>launch(rand(200,W-200), rand(120,H-200)), i*350); } }
-
-// expose small launch
-window.launchSmallFirework = launchSmallFirework;
-
-</script>
-</body>
-</html>
-    .petal.animate.delay1{animation-delay:0.15s}
-    .petal.animate.delay2{animation-delay:0.28s}
-    .petal.animate.delay3{animation-delay:0.4s}
-    .petal.animate.delay4{animation-delay:0.52s}
-
-    @keyframes bloom{
-      0%{transform:scale(0.35) translateY(40px) rotate(0);opacity:0}
-      60%{opacity:1}
-      100%{transform:scale(1) translateY(0) rotate(0);opacity:1}
+      100% {
+        background-position: 0% 50%;
+      }
     }
 
-    /* center core (small heart) */
-    .core{width:120px;height:110px;border-radius:50% 50% 45% 45%;background:radial-gradient(circle at 35% 30%,#fff3f6 0,#ff9eb6 10%,#ff5c8a 60%);transform:rotate(45deg);filter:drop-shadow(0 8px 30px rgba(255,80,120,0.25));opacity:0;transform-origin:center;animation:corePop 0.9s 0.7s forwards}
-    @keyframes corePop{0%{transform:scale(0.2) rotate(45deg);opacity:0}60%{opacity:1}100%{transform:scale(1) rotate(45deg);opacity:1}}
+    /* Container */
+    .wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      gap: 20px;
+      position: relative;
+    }
 
-    /* intro text */
-    .intro-text{margin-top:24px;font-size:28px;letter-spacing:1px;color:var(--accent);opacity:0;text-align:center}
-    .intro-text.show{animation:fadeUp 0.9s 0.95s forwards}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+    /* Intro panel */
+    .intro {
+      width: 100%;
+      max-width: 980px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+      backdrop-filter: blur(6px);
+      border-radius: 20px;
+      padding: 36px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
 
-    /* sparkle/gold particles around heart */
-    .spark-wrap{position:absolute;inset:0;z-index:9;pointer-events:none}
+    .heart-wrap {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
 
-    /* ---------- ENVELOPE / LETTER ---------- */
-    #letterStage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:11;pointer-events:none}
-    .envelope{width:320px;height:210px;background:linear-gradient(180deg,#fff,#ffeef3);border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.45);position:relative;transform-style:preserve-3d;cursor:pointer;pointer-events:auto}
-    .env-flap{position:absolute;left:0;right:0;top:0;height:60%;background:linear-gradient(180deg,#ffdfe8,#fff);border-top-left-radius:12px;border-top-right-radius:12px;transform-origin:top center;transform:rotateX(0deg);transition:transform .8s cubic-bezier(.2,.9,.1,1);z-index:3}
-    .env-body{position:absolute;left:8px;right:8px;bottom:8px;top:48px;background:#fff;border-radius:8px;padding:18px;overflow:hidden}
-    .letter-inner{position:absolute;left:12px;right:12px;bottom:12px;height:0;background:linear-gradient(180deg,#fff,#fff);border-radius:8px;transform-origin:bottom center;transition:height .7s ease .3s}
+    .left {
+      flex: 1;
+      min-width: 260px;
+    }
 
-    .envelope.open .env-flap{transform:rotateX(-140deg)}
-    .envelope.open .letter-inner{height:86%}
+    .right {
+      flex: 1;
+      min-width: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-    .open-hint{position:absolute;bottom:12px;left:0;right:0;text-align:center;color:#fff;opacity:.95;font-weight:600}
+    svg#heart {
+      width: 320px;
+      height: 320px;
+      display: block
+    }
 
-    /* teacher select modal */
-    .modal{position:fixed;left:50%;top:80%;transform:translate(-50%,0);z-index:12;background:var(--card);padding:20px;border-radius:14px;backdrop-filter:blur(6px);display:flex;gap:12px;align-items:center;box-shadow:0 8px 40px rgba(0,0,0,0.5)}
-    .modal select{padding:12px;border-radius:10px;border:none;font-size:16px}
-    .modal button{padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,#3bb6ff,#2a9df4);color:#04293A;font-weight:700;cursor:pointer}
+    .handwriting {
+      font-family: 'Pacifico', cursive;
+      font-size: 20px;
+      color: var(--card);
+      opacity: 0;
+      white-space: nowrap;
+    }
 
-    /* ---------- FILM / SLIDES ---------- */
-    #film{position:absolute;inset:0;z-index:6;display:none;padding:20px;overflow:hidden}
-    .film-track{display:flex;gap:28px;align-items:center;height:100%;transition:transform .9s cubic-bezier(.2,.9,.1,1)}
-    .frame{min-width:88vw;height:76vh;border-radius:18px;background:#111;background-size:cover;background-position:center;flex-shrink:0;display:flex;align-items:flex-end;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,0.6);backdrop-filter:blur(6px)}
+    .envelope {
+      width: 240px;
+      height: 150px;
+      background: linear-gradient(180deg, #fff3, #ffe9);
+      border-radius: 12px;
+      position: relative;
+      transform-origin: center;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      transition: transform .45s cubic-bezier(.2, .9, .3, 1);
+    }
 
-    .frame .caption{background:linear-gradient(90deg, rgba(0,0,0,0.6), rgba(0,0,0,0.25));padding:14px;border-radius:12px}
-    .frame .caption h3{margin:0 0 6px 0}
-    .frame .caption p{margin:0;color:#ddd}
+    .envelope:hover {
+      transform: translateY(-6px) scale(1.02)
+    }
 
-    .controls{position:absolute;left:50%;transform:translateX(-50%);bottom:30px;display:flex;gap:12px;z-index:20}
-    .controls button{background:var(--glass);border:none;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}
+    .card-tab {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -60%);
+      width: 86%;
+      height: 68%;
+      background: linear-gradient(180deg, #fff, #fff8);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: #222
+    }
 
-    /* ---------- POLAROID GALLERY ---------- */
-    .polaroid-container{position:absolute;right:20px;bottom:20px;z-index:7;pointer-events:none}
-    .polaroid{width:110px;height:140px;background:#fff;padding:10px;border-radius:8px;box-shadow:0 14px 40px rgba(0,0,0,0.45);display:block;object-fit:cover;margin-bottom:12px;transform-origin:center;opacity:0}
-    .falling{animation:fall 1.6s forwards cubic-bezier(.18,.9,.2,1)}
-    .delay1{animation-delay:.3s}.delay2{animation-delay:.55s}.delay3{animation-delay:.75s}
-    @keyframes fall{0%{opacity:0;transform:translateY(-40vh) rotate(-6deg) scale(.7)}60%{opacity:1}100%{transform:translateY(0) rotate(0) scale(1)}}
+    /* tile grid of teachers hidden until envelope clicked */
+    .tiles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-top: 22px
+    }
 
-    /* bokeh glow on polaroid */
-    .polaroid::after{content:"";position:absolute;inset:0;border-radius:8px;box-shadow:inset 0 0 60px rgba(255,200,220,0.04)}
+    .tile {
+      background: var(--glass);
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform .22s;
+      backdrop-filter: blur(6px)
+    }
 
-    /* ---------- STUDENT WISHES PAGE ---------- */
-    #wishes{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;padding:30px}
-    .wish-card{max-width:880px;background:linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));padding:30px;border-radius:18px;backdrop-filter:blur(6px);box-shadow:0 30px 80px rgba(0,0,0,0.5);}
-    .wish-card h2{margin-top:0}
-    .wish-list{display:flex;flex-direction:column;gap:12px;margin-top:12px}
-    .wish-item{background:rgba(255,255,255,0.03);padding:12px;border-radius:10px}
+    .tile:hover {
+      transform: translateY(-6px)
+    }
 
-    /* responsive */
-    @media (max-width:900px){
-      .frame{min-width:92vw;height:68vh}
-      .film-track{gap:16px}
-      .polaroid-container{display:none}
-      .modal{left:50%;top:auto;bottom:18px}
+    .tile img {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(255, 255, 255, 0.06)
+    }
+
+    .tile h4 {
+      margin: 8px 0 0 0;
+      font-size: 14px
+    }
+
+    .tile p {
+      margin: 4px 0 0 0;
+      font-size: 12px;
+      color: rgb(77, 77, 64)
+    }
+
+    /* Modal / teacher view */
+    .teacher-view {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.85));
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50
+    }
+
+    .teacher-card {
+      width: 100%;
+      max-width: 980px;
+      background: var(--card);
+      color: #222;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      overflow: auto;
+      max-height: 92vh
+    }
+
+    .tv-header {
+      display: flex;
+      gap: 14px;
+      align-items: center
+    }
+
+    .tv-header img {
+      width: 96px;
+      height: 96px;
+      border-radius: 12px;
+      object-fit: cover
+    }
+
+    .tv-header h2 {
+      margin: 0
+    }
+
+    .gallery {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px
+    }
+
+    .gallery img {
+      width: 100%;
+      max-height: 260px;
+      object-fit: cover;
+      border-radius: 12px;
+      flex: 1;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .6s, transform .6s
+    }
+
+    .wish-list {
+      margin-top: 14px
+    }
+
+    .wish {
+      background: #fff3;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      color: #222
+    }
+
+    .wish small {
+      display: block;
+      color: #666
+    }
+
+    .wish-form {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .wish-form input,
+    .wish-form textarea {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #eee;
+      font-size: 14px
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 0;
+      cursor: pointer;
+      font-weight: 600
+    }
+
+    /* audio toggle & fireworks btn */
+    .controls {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 60
+    }
+
+    .control-btn {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 10px;
+      border-radius: 12px;
+      color: #fff;
+      backdrop-filter: blur(6px);
+      border: 0;
+      cursor: pointer
+    }
+
+    /* small responsive tweaks */
+    @media (max-width:720px) {
+      .heart-wrap {
+        flex-direction: column
+      }
+
+      .intro {
+        padding: 18px
+      }
+
+      .gallery {
+        flex-direction: column
+      }
+    }
+
+    /* typing effect for wishes */
+    .typing {
+      border-right: 2px solid rgba(0, 0, 0, 0.6);
+      display: inline-block;
+      padding-right: 6px;
+      animation: blink .9s steps(2) infinite
+    }
+
+    @keyframes blink {
+      50% {
+        border-color: transparent
+      }
+    }
+
+    /* fireworks canvas sits behind teacher card when active */
+    canvas#fireworks {
+      position: fixed;
+      left: 0;
+      top: 0;
+      pointer-events: none;
+      z-index: 40;
+      display: none
+    }
+
+    /* small accessibility focus */
+    .tile:focus {
+      outline: 2px dashed rgba(255, 255, 255, 0.2)
     }
   </style>
 </head>
+
 <body>
-
-  <div class="stage">
-    <canvas class="fireworks"></canvas>
-    <div class="bokeh"></div>
-
-    <!-- INTRO FLOWER-HEART -->
-    <section id="intro">
+  <div class="wrap">
+    <div class="intro" aria-live="polite">
       <div class="heart-wrap">
-        <div class="petal p1"></div>
-        <div class="petal p2"></div>
-        <div class="petal p3"></div>
-        <div class="petal p4"></div>
-        <div class="petal p5"></div>
-        <div class="core"></div>
-      </div>
-      <div class="intro-text" id="introText">Tri ân thầy cô 20/11 — Lớp 9/4</div>
-      <div class="spark-wrap" id="sparkWrap"></div>
-    </section>
-
-    <!-- ENVELOPE -->
-    <div id="letterStage">
-      <div class="envelope" id="envelope" title="Nhấn để mở thư">
-        <div class="env-flap"></div>
-        <div class="env-body">
-          <div class="letter-inner" id="letterInner">
-            <div style="padding:18px;color:#333;"> <!-- inside letter content (hidden until open) -->
-              <h3 style="margin:0 0 6px 0">Lời tri ân lớp 9/4</h3>
-              <p style="margin:0;color:#444">Kính chúc thầy cô 20/11 vui vẻ, mạnh khỏe và hạnh phúc. Cảm ơn vì tất cả!</p>
-            </div>
+        <div class="left">
+          <svg id="heart" viewBox="0 0 512 512" role="img" aria-label="Trái tim tri ân">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0" stop-color="#ff7a7a" />
+                <stop offset="1" stop-color="#ffd070" />
+              </linearGradient>
+            </defs>
+            <path id="heartPath"
+              d="M256 448s-160-96-200-176C20 176 96 80 192 112 224 120 256 144 256 144s32-24 64-32c96-32 172 64 136 160-40 80-200 176-200 176z"
+              fill="none" stroke="url(#g1)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+            <path
+              d="M256 448s-160-96-200-176C20 176 96 80 192 112 224 120 256 144 256 144s32-24 64-32c96-32 172 64 136 160-40 80-200 176-200 176z"
+              fill="rgba(255,255,255,0.03)" />
+          </svg>
+          <div style="margin-top:10px">
+            <div class="handwriting" id="handwriting">Chúc mừng Ngày Nhà Giáo Việt Nam 20/11 — Lớp 9/4</div>
+            <p style="opacity:0.9;margin-top:8px;color:rgb(51, 51, 42)">Một món quà nhỏ gửi đến các thầy cô — click vào phong thư
+              để chọn tên thầy/cô.</p>
+          </div>
+        </div>
+        <div class="right">
+          <div class="envelope" id="envelope" tabindex="0" role="button" aria-label="Mở phong thư">
+            <div class="card-tab">Thiệp bất ngờ</div>
           </div>
         </div>
       </div>
-      <div class="open-hint">Nhấn để mở thư gửi thầy cô ❤️</div>
-    </div>
 
-    <!-- TEACHER CHOICE -->
-    <div class="modal" id="teacherModal" style="display:none;pointer-events:auto">
-      <label style="color:#cfe7ff;font-weight:700">Chọn thầy/cô:</label>
-      <select id="teacherSelect">
-        <option value="">-- Chọn --</option>
-        <option value="CoA">Cô A</option>
-        <option value="ThayB">Thầy B</option>
-        <option value="CoC">Cô C</option>
-      </select>
-      <button id="startBtn">Bắt đầu</button>
-    </div>
-
-    <!-- FILM SLIDES -->
-    <section id="film">
-      <div class="film-track" id="filmTrack">
-        <div class="frame" id="f1"><div class="caption"><h3 id="c1title"></h3><p id="c1text"></p></div></div>
-        <div class="frame" id="f2"><div class="caption"><h3 id="c2title"></h3><p id="c2text"></p></div></div>
-        <div class="frame" id="f3"><div class="caption"><h3 id="c3title"></h3><p id="c3text"></p></div></div>
+      <!-- tiles (hidden initially) -->
+      <div id="tilesWrapper" style="display:none;margin-top:18px">
+        <h3 style="margin:6px 0 10px 0">Thầy cô là ai ạ?</h3>
+        <div class="tiles" id="tiles"></div>
       </div>
-      <div class="controls">
-        <button id="prev">Prev</button>
-        <button id="next">Next</button>
-        <button id="gotoWishes">Lời chúc</button>
-      </div>
-    </section>
-
-    <!-- POLAROID GALLERY -->
-    <div class="polaroid-container" id="polaroids">
-      <img src="https://i.imgur.com/7m7J4pD.png" class="polaroid falling delay1" alt="p1">
-      <img src="https://i.imgur.com/NpGwz9G.jpeg" class="polaroid falling delay2" alt="p2">
-      <img src="https://i.imgur.com/z9wQ8QZ.jpeg" class="polaroid falling delay3" alt="p3">
     </div>
-
-    <!-- STUDENT WISHES -->
-    <section id="wishes">
-      <div class="wish-card">
-        <h2>💌 Lời chúc 20/11 từ Học sinh Lớp 9/4</h2>
-        <div class="wish-list" id="wishList">
-          <!-- items added dynamically -->
-        </div>
-      </div>
-    </section>
-
-    <!-- background music (provide music.mp3 in same folder) -->
-    <audio id="bgm" src="music.mp3" loop></audio>
-
   </div>
 
+  <!-- teacher modal -->
+  <div class="teacher-view" id="teacherView" aria-hidden="true">
+    <div class="teacher-card" role="dialog" aria-modal="true" aria-labelledby="teacherTitle">
+      <button id="closeTeacher" style="float:right;border:0;background:none;font-weight:700;cursor:pointer">✕</button>
+      <div class="tv-header">
+        <img id="teacherAvatar" src="" alt="">
+        <div>
+          <h2 id="teacherTitle"></h2>
+          <p id="teacherSubject" style="margin:6px 0 0 0;color:#666"></p>
+          <div style="margin-top:6px">
+            <button class="btn" id="fireworkBtn">Pháo hoa!</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery" id="gallery">
+        <!-- images -->
+      </div>
+
+      <div class="wish-list" id="wishList">
+        <h3 style="margin-top:12px">Lời chúc của học sinh</h3>
+        <div id="wishesContainer"></div>
+      </div>
+
+      <div class="wish-form"> <input id="inputName" placeholder="Tên (hoặc để trống để ẩn tên)"> <input id="inputClass"
+          placeholder="Lớp, ví dụ: 9/4"> <textarea id="inputContent" rows="4" placeholder="Viết lời chúc..."
+          maxlength="800"></textarea> <label><input type="checkbox" id="hideName"> Ẩn tên</label> <button class="btn"
+          id="sendWish">Gửi lời chúc</button> </div>
+    </div>
+    <small style="color:#ccc;margin-top:6px">Bài gửi sẽ được admin duyệt trước khi hiển thị</small>
+  </div>
+  </div>
+  </div>
+
+  <!-- fireworks canvas -->
+  <canvas id="fireworks"></canvas>
+
+  <!-- controls -->
+  <div class="controls" aria-hidden="false">
+    <button class="control-btn" id="openAll">🏠 Về trang chính</button>
+  </div>
+
+  <audio id="bgAudio" autoplay muted>
+    <source src="assets/bg-music.mp3" type="audio/mpeg">
+  </audio>
+
+
   <script>
-    // ---------- small helper ----------
-    const $ = (sel)=>document.querySelector(sel);
+    /*****************************
+     * CONFIG
+     *****************************/
+    // Nếu bạn muốn lưu thực tế: đặt endpoint Google Apps Script (web app chạy doPost)
+    const SHEET_ENDPOINT = ''; // ví dụ: 'https://script.google.com/macros/s/AKfycbx.../exec'
+    // Các teacher mẫu — thay ảnh bằng URL thực tế
+    const TEACHERS = [
+      { id: 'gv1', name: 'Cô Huỳnh Thị Phương Ngọc', subject: 'Giáo viên chủ nhiệm', avatar: 'assets/GV1.png', photos: ['https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=800', 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800'] },
+      { id: 'gv2', name: 'Cô Kim Yến', subject: 'Toán', avatar: 'assets/GV1.png', photos: ['https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800', 'https://images.unsplash.com/photo-1524253482453-3fed8d2fe12b?w=800'] },
+      { id: 'gv3', name: 'Cô Lê Minh Hoa', subject: 'Ngữ Văn', avatar: 'assets/GV1.png', photos: ['https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=800'] },
+      { id: 'gv4', name: 'Cô Trần Ngọc Minh', subject: 'Tiếng Anh', avatar: 'assets/GV1.png', photos: [] },
+      { id: 'gv5', name: 'Thầy Trần Kim Thành', subject: 'Tiếng Anh', avatar: 'assets/GV1.png', photos: [] },
+      { id: 'gv6', name: 'Thầy Nguyễn Huy Hiệp', subject: 'Khoa Học Tự Nhiên', avatar: 'assets/GV1.png', photos: [] },
+      { id: 'gv7', name: 'Cô Nguyễn Thị Thanh Loan', subject: 'GDCD', avatar: 'assets/GV1.png', photos: [] },
+      { id: 'gv8', name: 'Cô Nguyễn Thị Tri Tâm', subject: 'Tin Học', avatar: 'assets/GV1.png', photos: [] }
+    ];
 
-    // ---------- INTRO SEQUENCE ----------
-    const petals = document.querySelectorAll('.petal');
-    const core = document.querySelector('.core');
-    const introText = document.getElementById('introText');
-    const sparkWrap = document.getElementById('sparkWrap');
+    // demo storage keys (for demo without backend)
+    const STORAGE_KEY = 'wishes_demo_9_4';
+
+    /*****************************
+     * UTILS: small helpers
+     *****************************/
+    function $(sel) { return document.querySelector(sel) }
+    function $all(sel) { return Array.from(document.querySelectorAll(sel)) }
+    function saveLocal(wishes) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(wishes || []));
+    }
+    function loadLocal() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') } catch (e) { return [] }
+    }
+
+    /*****************************
+     * Heart stroke animation + typing reveal
+     *****************************/
+    (function heartAnim() {
+      const path = document.getElementById('heartPath');
+      const length = path.getTotalLength();
+      path.style.strokeDasharray = length;
+      path.style.strokeDashoffset = length;
+      path.getBoundingClientRect(); // force layout
+      path.style.transition = 'stroke-dashoffset 2.4s ease-in-out';
+      setTimeout(() => { path.style.strokeDashoffset = '0'; }, 600);
+
+      // handwriting fade-in after draw
+      setTimeout(() => { const hw = document.getElementById('handwriting'); hw.style.opacity = 1; hw.classList.add('typing') }, 3100);
+    })();
+
+    /*****************************
+     * Envelope -> show tiles
+     *****************************/
     const envelope = document.getElementById('envelope');
-    const teacherModal = document.getElementById('teacherModal');
-    const startBtn = document.getElementById('startBtn');
-    const bgm = document.getElementById('bgm');
-
-    function playBgm(){
-      // try to play (some browsers require user gesture) - will be triggered by click after open
-      bgm.volume = 0.6;
-      bgm.play().catch(()=>{});
-    }
-
-    // add bloom classes in order
-    setTimeout(()=>{
-      petals[0].classList.add('animate');
-      petals[1].classList.add('animate','delay1');
-      petals[2].classList.add('animate','delay2');
-      petals[3].classList.add('animate','delay3');
-      petals[4].classList.add('animate','delay4');
-      core.classList.add('animate');
-      introText.classList.add('show');
-
-      // gentle particle sparkles
-      createSparks(18);
-
-      // after bloom show envelope
-      setTimeout(()=>{
-        document.getElementById('letterStage').style.pointerEvents='auto';
-        document.querySelector('.open-hint').style.opacity=1;
-      },1200);
-    },350);
-
-    function createSparks(n){
-      for(let i=0;i<n;i++){
-        const s=document.createElement('div');
-        s.style.position='absolute';s.style.width='6px';s.style.height='6px';
-        s.style.borderRadius='50%';s.style.left=(40+Math.random()*60)+'%';s.style.top=(30+Math.random()*40)+'%';
-        s.style.background='radial-gradient(circle,#fff8, rgba(255,80,120,0.9) 40%, rgba(255,80,120,0.0) 60%)';
-        s.style.opacity=0; s.style.transform='scale(.3)'; s.style.pointerEvents='none';
-        sparkWrap.appendChild(s);
-        setTimeout(()=>{s.style.transition='all 1.4s cubic-bezier(.2,.9,.1,1)';s.style.opacity=1;s.style.transform='scale(1) translateY(-20px)';},100+Math.random()*400);
-        setTimeout(()=>{s.style.opacity=0; s.remove();},2200+Math.random()*1200);
-      }
-    }
-
-    // ---------- ENVELOPE OPEN ----------
-    envelope.addEventListener('click',()=>{
-      envelope.classList.toggle('open');
-      // show teacher choice modal
-      teacherModal.style.display='flex';
-      playBgm();
-    });
-
-    // ---------- TEACHER CHOICE / START ----------
-    startBtn.addEventListener('click',()=>{
-      const t = document.getElementById('teacherSelect').value;
-      if(!t) return alert('Vui lòng chọn thầy/cô');
-      teacherModal.style.display='none';
-      // begin film sequence
-      startFilm(t);
-    });
-
-    // ---------- FILM SEQUENCE ----------
-    const film = document.getElementById('film');
-    const filmTrack = document.getElementById('filmTrack');
-    let idx=0;
-    const frames = [document.getElementById('f1'),document.getElementById('f2'),document.getElementById('f3')];
-
-    const teacherData = {
-      CoA:{slides:[
-        {img:'https://i.imgur.com/87ikIDp.jpeg',title:'Kỷ niệm cùng Cô A',txt:'Những bài học nhẹ nhàng, tận tâm.'},
-        {img:'https://i.imgur.com/NpGwz9G.jpeg',title:'Những giờ học vui',txt:'Cô luôn lắng nghe và chia sẻ.'},
-        {img:'https://i.imgur.com/z9wQ8QZ.jpeg',title:'Lời tri ân',txt:'Cảm ơn cô đã dìu dắt chúng em.'}
-      ],wishTitle:'Cô A kính mến',wishText:'Chúc cô luôn mạnh khỏe, hạnh phúc và tươi cười!'},
-      ThayB:{slides:[
-        {img:'https://i.imgur.com/oSgZxbN.jpeg',title:'Những khoảnh khắc cùng Thầy B',txt:'Sự nghiêm túc nhưng đầy ấm áp.'},
-        {img:'https://i.imgur.com/7m7J4pD.png',title:'Giờ kiểm tra',txt:'Thầy truyền cảm hứng cho chúng em.'},
-        {img:'https://i.imgur.com/87ikIDp.jpeg',title:'Lời tri ân',txt:'Cảm ơn thầy vì tất cả.'}
-      ],wishTitle:'Thầy B kính mến',wishText:'Chúc thầy luôn mạnh khỏe, thành công và nhiều niềm vui!'},
-      CoC:{slides:[
-        {img:'https://i.imgur.com/z9wQ8QZ.jpeg',title:'Kỷ niệm cùng Cô C',txt:'Nụ cười của cô là động lực.'},
-        {img:'https://i.imgur.com/NpGwz9G.jpeg',title:'Những giờ ngoại khóa',txt:'Cô luôn ở bên chúng em.'},
-        {img:'https://i.imgur.com/oSgZxbN.jpeg',title:'Lời tri ân',txt:'Cảm ơn cô vì những sẻ chia.'}
-      ],wishTitle:'Cô C kính mến',wishText:'Chúc cô một ngày 20/11 rực rỡ và an lành!'}
-    };
-
-    function startFilm(teacherKey){
-      const data = teacherData[teacherKey];
-      if(!data) return;
-      // set frames
-      frames.forEach((f,i)=>{
-        f.style.backgroundImage = `url(${data.slides[i].img})`;
-        f.querySelector('.caption h3').innerText = data.slides[i].title;
-        f.querySelector('.caption p').innerText = data.slides[i].txt;
+    const tilesWrapper = document.getElementById('tilesWrapper');
+    const tilesEl = document.getElementById('tiles');
+    let envelopeOpened = false;
+    function renderTiles() {
+      tilesEl.innerHTML = '';
+      TEACHERS.forEach(t => {
+        const div = document.createElement('button');
+        div.className = 'tile';
+        div.setAttribute('data-id', t.id);
+        div.innerHTML = `<img loading="lazy" src="${t.avatar}" alt="${t.name}"/><h4>${t.name}</h4><p>${t.subject}</p>`;
+        div.addEventListener('click', () => openTeacher(t.id));
+        tilesEl.appendChild(div);
       });
-
-      // show film
-      film.style.display='block';
-      // animate polaroids
-      document.querySelectorAll('.polaroid').forEach((p,idx)=>{p.src = data.slides[idx%data.slides.length].img; p.classList.remove('falling'); void p.offsetWidth; p.classList.add('falling')});
-
-      // autoplay slides every 4s
-      idx=0; updateTrack();
-      film.auto = setInterval(()=>{ idx = (idx+1)%frames.length; updateTrack();},4300);
-
-      // prepare wishes content
-      buildWishes(data.wishTitle,data.wishText);
+    }
+    envelope.addEventListener('click', openEnvelope);
+    envelope.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') openEnvelope() })
+    function openEnvelope() {
+      if (envelopeOpened) return;
+      envelopeOpened = true;
+      // simple 3D open effect
+      envelope.style.transition = 'transform .6s cubic-bezier(.2,.9,.3,1)';
+      envelope.style.transform = 'rotateX(12deg) translateY(-18px) scale(1.02)';
+      // show tiles after animation
+      setTimeout(() => { tilesWrapper.style.display = 'block'; renderTiles(); }, 620);
+      // optionally play sound (omitted asset): simulate with small web audio or leave for implementer
     }
 
-    function updateTrack(){ filmTrack.style.transform = `translateX(${ - (idx * (window.innerWidth * 0.02 + frames[0].offsetWidth)) }px)`; }
+    /*****************************
+     * Routing: open teacher by hash or id
+     *****************************/
+    const teacherView = document.getElementById('teacherView');
+    const teacherAvatar = document.getElementById('teacherAvatar');
+    const teacherTitle = document.getElementById('teacherTitle');
+    const teacherSubject = document.getElementById('teacherSubject');
+    const gallery = document.getElementById('gallery');
+    const wishesContainer = document.getElementById('wishesContainer');
 
-    // controls
-    document.getElementById('next').addEventListener('click',()=>{ clearInterval(film.auto); idx=(idx+1)%frames.length; updateTrack(); film.auto=setInterval(()=>{ idx=(idx+1)%frames.length; updateTrack();},4300)});
-    document.getElementById('prev').addEventListener('click',()=>{ clearInterval(film.auto); idx=(idx-1+frames.length)%frames.length; updateTrack(); film.auto=setInterval(()=>{ idx=(idx+1)%frames.length; updateTrack();},4300)});
-    document.getElementById('gotoWishes').addEventListener('click',()=>{ clearInterval(film.auto); film.style.display='none'; showWishes(); });
-
-    // ---------- WISHES ----------
-    function buildWishes(title,text){
-      const wishList = document.getElementById('wishList'); wishList.innerHTML='';
-      const header = document.createElement('div'); header.className='wish-item'; header.style.fontWeight='700'; header.innerText = title + ' — ' + text; wishList.appendChild(header);
-
-      // sample student wishes - could be extended to accept input
-      const samples = [
-        'Chúc thầy cô luôn mạnh khỏe, đầy nhiệt huyết để dẫn đường chúng em.',
-        'Cảm ơn thầy cô đã cho chúng em kiến thức và tình thương.',
-        'Chúc thầy cô luôn vui vẻ, hạnh phúc và luôn nhận được yêu thương từ học sinh.',
-        'Lớp 9/4 mãi nhớ tới những kỷ niệm bên thầy cô!'
-      ];
-      samples.forEach(s=>{const el=document.createElement('div');el.className='wish-item';el.innerText='💙 '+s;wishList.appendChild(el)});
+    function getTeacherById(id) {
+      return TEACHERS.find(t => t.id === id);
     }
 
-    function showWishes(){
-      document.getElementById('wishes').style.display='flex';
-      window.scrollTo({top:0,behavior:'smooth'});
+    function openTeacher(id) {
+      const t = getTeacherById(id);
+      if (!t) return;
+      // render header
+      teacherAvatar.src = t.avatar;
+      teacherAvatar.alt = t.name;
+      teacherTitle.textContent = t.name;
+      teacherSubject.textContent = t.subject;
+      // gallery
+      gallery.innerHTML = '';
+      const photos = (t.photos && t.photos.length) ? t.photos : [t.avatar];
+      photos.forEach(p => {
+        const img = document.createElement('img');
+        img.dataset.src = p;
+        img.alt = t.name + ' photo';
+        gallery.appendChild(img);
+      });
+      // show wishes for this teacher
+      renderWishesForTeacher(id);
+      // show modal
+      teacherView.style.display = 'flex';
+      teacherView.setAttribute('aria-hidden', 'false');
+      // set hash for linkability
+      location.hash = `teacher=${id}`;
+      // lazy reveal images via IntersectionObserver
+      setTimeout(initLazyReveal, 100);
     }
 
-    // ---------- FIREWORKS (simple particles) ----------
-    const canvas = document.querySelector('canvas.fireworks');
-    const ctx = canvas.getContext('2d');
-    function resize(){canvas.width=innerWidth;canvas.height=innerHeight}
-    resize(); window.addEventListener('resize',resize);
+    $('#closeTeacher').addEventListener('click', closeTeacher);
+    function closeTeacher() {
+      teacherView.style.display = 'none';
+      teacherView.setAttribute('aria-hidden', 'true');
+      // remove hash
+      history.pushState("", document.title, window.location.pathname + window.location.search);
+      stopFireworks();
+    }
 
-    const sparks=[];
-    function spawnFire(x,y){ for(let i=0;i<35;i++){ sparks.push({x,y, vx:(Math.random()-0.5)*6, vy:(Math.random()-1.5)*6, life: Math.random()*60+60, c: `hsl(${Math.random()*60+300},90%,60%)` }) } }
+    // open via hash on load
+    window.addEventListener('load', () => {
+      const hash = location.hash.replace('#', '');
+      if (hash.startsWith('teacher=')) {
+        const id = hash.split('=')[1];
+        // simulate envelope open first
+        openEnvelope();
+        setTimeout(() => openTeacher(id), 700);
+      }
+    });
 
-    function tick(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(let i=sparks.length-1;i>=0;i--){ const p = sparks[i]; p.vy += 0.08; p.x += p.vx; p.y += p.vy; p.life--; ctx.globalCompositeOperation='lighter'; ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x,p.y, Math.max(1,p.life/30),0,Math.PI*2); ctx.fill(); if(p.life<=0) sparks.splice(i,1); } requestAnimationFrame(tick); }
-    tick();
+    /*****************************
+     * Lazy load + fade-in (IntersectionObserver)
+     *****************************/
+    let io;
+    function initLazyReveal() {
+      if (io) io.disconnect();
+      const imgs = gallery.querySelectorAll('img');
+      const options = { root: null, rootMargin: '100px', threshold: 0.1 };
+      io = new IntersectionObserver((entries, obs) => {
+        entries.forEach(en => {
+          if (en.isIntersecting) {
+            const img = en.target;
+            img.src = img.dataset.src;
+            img.onload = () => { img.style.opacity = 1; img.style.transform = 'translateY(0)'; }
+            obs.unobserve(img);
+          }
+        });
+      }, options);
+      imgs.forEach(i => io.observe(i));
+    }
 
-    // occasional big fireworks during film
-    setInterval(()=>{ if(document.getElementById('film').style.display==='block'){ spawnFire(Math.random()*innerWidth*0.8+innerWidth*0.1, innerHeight*0.35+Math.random()*innerHeight*0.2)} },1700);
+    /*****************************
+     * Wishes: local storage + POST to sheet (if configured)
+     *****************************/
+    async function renderWishesForTeacherRealtime(teacherId) {
+      const {
+        collection,
+        query,
+        where,
+        orderBy,
+        onSnapshot
+      } = window._fs;
+      const db = window._db;
 
-    // ---------- ensure no errors if user interacts quickly ----------
-    window.addEventListener('load',()=>{ try{ /* no-op */ }catch(e){console.error(e)} });
+      wishesContainer.innerHTML = "<p style='color:#aaa'>Đang tải...</p>";
 
-    // accessibility: allow pressing Enter to open envelope
-    envelope.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') envelope.click(); });
+      const q = query(
+        collection(db, "wishes"),
+        where("teacherId", "==", teacherId),
+        where("status", "==", "approved"),
+        orderBy("ts", "desc")
+      );
+
+      // LẮNG NGHE REALTIME
+      onSnapshot(q, (snap) => {
+        wishesContainer.innerHTML = "";
+
+        if (snap.empty) {
+          wishesContainer.innerHTML = "<p style='color:#999'>Chưa có lời chúc nào.</p>";
+          return;
+        }
+
+        snap.forEach((doc) => {
+          const w = doc.data();
+          const d = new Date(w.ts);
+
+          const el = document.createElement("div");
+          el.className = "wish";
+          el.innerHTML = `
+        <strong>${w.hidden ? "Ẩn tên" : (w.name || "Học sinh")}</strong>
+        <small>${d.toLocaleString()}</small>
+        <div style="margin-top:6px">${escapeHtml(w.content)}</div>
+      `;
+          wishesContainer.appendChild(el);
+        });
+      });
+    }
+
+
+    // send wish handler
+    document.getElementById('sendWish').addEventListener('click', async () => {
+      const name = $('#inputName').value.trim();
+      const klass = $('#inputClass').value.trim();
+      const content = $('#inputContent').value.trim();
+      const hidden = $('#hideName').checked;
+      const teacherId = location.hash.replace('#', '').split('=')[1] || null;
+      if (!teacherId) { alert('Lỗi: không xác định thầy/cô'); return; }
+      if (content.length < 4) { alert('Lời chúc quá ngắn'); return; }
+
+      const wish = { teacherId, name: name || '', klass: klass || '', content, hidden, ts: Date.now(), status: SHEET_ENDPOINT ? 'pending' : 'approved', id: 'w' + Date.now() };
+
+      // save locally for demo
+      const all = loadLocal();
+      all.push(wish);
+      saveLocal(all);
+      renderWishesForTeacher(teacherId);
+      $('#inputContent').value = '';
+
+      // try submit to server if endpoint set
+      if (SHEET_ENDPOINT) {
+        try {
+          const resp = await fetch(SHEET_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(wish) });
+          if (!resp.ok) throw new Error('Network');
+          alert('Đã gửi — chờ admin duyệt.');
+        } catch (e) {
+          console.warn('Gửi lên sheet lỗi', e);
+          alert('Lưu cục bộ thành công, gửi lên server thất bại.');
+        }
+      } else {
+        // in demo we auto-approve
+        alert('Lưu lời chúc (demo): đã hiển thị cục bộ. Để gửi thực tế, cấu hình SHEET_ENDPOINT trong code.');
+      }
+    });
+
+    function escapeHtml(s) { return s.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]) }
+
+    /*****************************
+     * Audio background toggle
+     *****************************/
+    window.addEventListener('load', () => {
+      const bgAudio = document.getElementById('bgAudio');
+
+      // bật tiếng lại sau 1 giây
+      setTimeout(() => {
+        bgAudio.muted = false;
+        bgAudio.volume = 1;
+      }, 1000);
+    });
+
+
+    /*****************************
+     * Fireworks canvas (simple)
+     *****************************/
+    const fireCanvas = document.getElementById('fireworks');
+    const ctx = fireCanvas.getContext('2d');
+    let fwAnim = null;
+    function resizeCanvas() { fireCanvas.width = window.innerWidth; fireCanvas.height = window.innerHeight; }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function startFireworks(color = '#ff7a7a') {
+      fireCanvas.style.display = 'block';
+      const particles = [];
+      function spawn(x, y) {
+        for (let i = 0; i < 80; i++) {
+          particles.push({
+            x, y,
+            vx: (Math.random() - 0.5) * 6,
+            vy: (Math.random() - 1.5) * 6,
+            life: Math.random() * 60 + 40,
+            r: Math.random() * 2 + 1,
+            col: color
+          });
+        }
+      }
+      // spawn center
+      spawn(window.innerWidth / 2, window.innerHeight / 3);
+
+      function loop() {
+        ctx.clearRect(0, 0, fireCanvas.width, fireCanvas.height);
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.life--;
+          ctx.beginPath(); ctx.globalAlpha = Math.max(0, p.life / 120); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = p.col; ctx.fill();
+          if (p.life <= 0) particles.splice(i, 1);
+        }
+        if (particles.length < 10) spawn(Math.random() * fireCanvas.width, Math.random() * fireCanvas.height / 3);
+        fwAnim = requestAnimationFrame(loop);
+      }
+      loop();
+      // auto stop after 7s
+      setTimeout(stopFireworks, 7000);
+    }
+    function stopFireworks() {
+      if (fwAnim) cancelAnimationFrame(fwAnim);
+      ctx.clearRect(0, 0, fireCanvas.width, fireCanvas.height);
+      fireCanvas.style.display = 'none';
+    }
+
+    document.getElementById('fireworkBtn').addEventListener('click', () => startFireworks('#ffd070'));
+
+    /*****************************
+     * Open all / home btn & keyboard
+     *****************************/
+    document.getElementById('openAll').addEventListener('click', () => { closeTeacher(); window.scrollTo({ top: 0, behavior: 'smooth' }) });
+
+    // Escape closes teacher view
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeTeacher(); });
+
+    /*****************************
+     * Init: render tiles hidden at start
+     *****************************/
+    renderTiles();
+
+    /*****************************
+     * Demo: preload some demo wishes if storage empty (optional)
+     *****************************/
+    (function seedDemo() {
+      const cur = loadLocal();
+      if (cur.length === 0) {
+        const now = Date.now();
+        const seed = [
+          { id: 's1', teacherId: 'gv1', name: 'Ngọc', klass: '9/4', content: 'Cảm ơn thầy đã dạy tụi em thật tận tâm! ❤️', hidden: false, ts: now - 3600 * 1000 },
+          { id: 's2', teacherId: 'gv2', name: 'Hà', klass: '9/4', content: 'Cảm ơn cô đã truyền cảm hứng cho em với văn học!', hidden: false, ts: now - 2000 * 1000 }
+        ];
+        saveLocal(seed);
+      }
+    })();
+
+    /*****************************
+     * Accessibility: allow tiles focus + enter
+     *****************************/
+    tilesEl.addEventListener('keydown', (e) => {
+      const t = e.target.closest('.tile');
+      if (!t) return;
+      if (e.key === 'Enter' || e.key === ' ') t.click();
+    });
 
   </script>
-</body>
-</html>
 
+</body>
+
+</html>
