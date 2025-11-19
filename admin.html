@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin – Duyệt Lời Chúc</title>
+    <style>
+        body {
+            font-family: Poppins;
+            padding: 20px;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            background: #fff;
+        }
+
+        button {
+            padding: 6px 12px;
+            margin-top: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .approve {
+            background: #4caf50;
+            color: white;
+            border: none;
+        }
+
+        .reject {
+            background: #e14a4a;
+            color: white;
+            border: none;
+        }
+    </style>
+
+    <script type="module">
+        /* ========== FIREBASE CONFIG ========== */
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import {
+            getAuth,
+            onAuthStateChanged,
+            signInWithPopup,
+            GoogleAuthProvider
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        import {
+            getFirestore,
+            collection,
+            query,
+            where,
+            orderBy,
+            onSnapshot,
+            updateDoc,
+            deleteDoc,
+            doc
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBOxu2m8gBVudjy8tUUPIji7COaMFUKMM",
+            authDomain: "web20thang11.firebaseapp.com",
+            projectId: "web20thang11",
+            storageBucket: "web20thang11.firebasestorage.app",
+            messagingSenderId: "876267619684",
+            appId: "1:876267619684:web:2238ef31aacf8a7e966671",
+            measurementId: "G-8J68YJC7F1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        /* THAY EMAIL ADMIN CỦA BẠN */
+        const ADMIN_EMAIL = "nguoitao.web@gmail.com";
+
+        /* ===================== AUTH CHECK ===================== */
+        onAuthStateChanged(auth, user => {
+            if (!user) {
+                signInWithPopup(auth, provider);
+                return;
+            }
+
+            if (user.email !== ADMIN_EMAIL) {
+                alert("Bạn không có quyền truy cập trang admin!");
+                window.location.href = "index.html";
+                return;
+            }
+
+            console.log("Đăng nhập admin:", user.email);
+            loadPending();
+        });
+        function loadApproved() {
+            const approvedList = document.getElementById("approvedList");
+            const q = query(
+                collection(db, "wishes"),
+                where("status", "==", "approved"),
+                orderBy("ts", "desc")
+            );
+            onSnapshot(q, snap => {
+                approvedList.innerHTML = "";
+                if (snap.empty) {
+                    approvedList.innerHTML = "<p>Chưa có lời chúc nào được duyệt.</p>";
+                    return;
+                }
+                snap.forEach(d => {
+                    const w = d.data();
+                    const el = document.createElement("div");
+                    el.className = "card";
+                    el.innerHTML = `
+                <h3>${w.hidden ? "Ẩn tên" : w.name}</h3>
+                <p><strong>GV:</strong> ${w.teacherId}</p>
+                <p>${w.content}</p>
+                <p><small>${new Date(w.ts).toLocaleString()}</small></p>
+                <button class="reject">Xóa</button>
+            `;
+                    el.querySelector(".reject").onclick = async () => {
+                        if (confirm("Xóa lời chúc này?")) {
+                            await deleteDoc(doc(db, "wishes", d.id));
+                        }
+                    };
+                    approvedList.appendChild(el);
+                });
+            });
+        }
+        function notifyNewWish(wish) {
+            if (!("Notification" in window)) return;
+            if (Notification.permission === "granted") {
+                new Notification(`Lời chúc mới cho ${wish.teacherId}`, {
+                    body: wish.hidden ? "Ẩn tên" : wish.name + ": " + wish.content,
+                    icon: "/icon.png"
+                });
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(p => {
+                    if (p === "granted") notifyNewWish(wish);
+                });
+            }
+        }
+
+        // Trong onSnapshot pending:
+        onSnapshot(q, snap => {
+            snap.docChanges().forEach(change => {
+                if (change.type === "added") {
+                    notifyNewWish(change.doc.data());
+                }
+            });
+        });
+
+        /* ===================== LOAD REALTIME ===================== */
+        function loadPending() {
+            const list = document.getElementById("pendingList");
+
+            const q = query(
+                collection(db, "wishes"),
+                where("status", "==", "pending"),
+                orderBy("ts", "desc")
+            );
+
+            onSnapshot(q, snap => {
+                list.innerHTML = "";
+
+                if (snap.empty) {
+                    list.innerHTML = "<p>Không có lời chúc chờ duyệt.</p>";
+                    return;
+                }
+
+                snap.forEach(d => {
+                    const w = d.data();
+                    const el = document.createElement("div");
+                    el.className = "card";
+
+                    el.innerHTML = `
+                        <h3>${w.hidden ? "Ẩn tên" : w.name}</h3>
+                        <p><strong>GV:</strong> ${w.teacherId}</p>
+                        <p>${w.content}</p>
+                        <button class="approve">Duyệt</button>
+                        <button class="reject">Xóa</button>
+                    `;
+
+                    el.querySelector(".approve").onclick = async () => {
+                        await updateDoc(doc(db, "wishes", d.id), {
+                            status: "approved"
+                        });
+                    };
+
+                    el.querySelector(".reject").onclick = async () => {
+                        if (confirm("Xóa lời chúc này?")) {
+                            await deleteDoc(doc(db, "wishes", d.id));
+                        }
+                    };
+
+                    list.appendChild(el);
+                });
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <h2>Lời chúc đã duyệt</h2>
+    <div id="approvedList"></div>
+    <h1>Admin – Duyệt Lời Chúc</h1>
+    <div id="pendingList"></div>
+</body>
+
+</html>
