@@ -498,7 +498,7 @@
       { id: 'gv8', name: 'Cô Nguyễn Thị Tri Tâm', subject: 'Tin Học', avatar: 'assets/GV8.jpg', photos: ['assets/GV8_1.jpg', 'assets/GV8_2.jpg', 'assets/GV8_3.jpg'] },
       { id: 'gv9', name: 'Thầy Nguyễn Điền Khắc Duy', subject: 'Lịch Sử - Địa Lý', avatar: 'assets/GV9.png', photos: ['assets/GV9_1.png'] },
       { id: 'gv10', name: 'Cô Lê Thị Hải Hưng', subject: 'Nghệ Thuật', avatar: 'assets/GV10.jpg', photos: [] },
-      { id: 'gv11', name: 'Thầy Trần Việt Tuấn', subject: 'Giáo Dục Thể Chất', avatar: 'assets/GV11.png', photos: [] },
+      { id: 'gv11', name: 'Thầy Trần Việt Tuấn', subject: 'Giáo Dục Thể Chất', avatar: 'assets/GV11.jpg', photos: [] },
     ];
 
     // demo storage keys (for demo without backend)
@@ -735,15 +735,17 @@
     const audioToggle = document.getElementById('audioToggle');
     const bgAudio = document.getElementById('bgAudio');
 
-    audioToggle.addEventListener('click', () => {
-      if (bgAudio.paused) {
-        bgAudio.play().catch(e => console.log('Play bị ngắt:', e));
-      } else {
-        bgAudio.pause();
+    audioToggle.addEventListener('click', async () => {
+      try {
+        if (bgAudio.paused) {
+          await bgAudio.play();
+        } else {
+          bgAudio.pause();
+        }
+      } catch (e) {
+        console.log('Play bị ngắt:', e);
       }
     });
-
-
 
     /*****************************
      * Fireworks canvas (simple)
