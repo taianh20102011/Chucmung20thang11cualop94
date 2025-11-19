@@ -471,6 +471,16 @@
     // expose for your script
     window._db = db;
     window._fs = { collection, addDoc, serverTimestamp, query, where, orderBy, onSnapshot };
+    window.escapeHtml = function (str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    };
+
     /*****************************
      * CONFIG
      *****************************/
@@ -669,17 +679,20 @@
 
         snap.forEach((doc) => {
           const w = doc.data();
-          const d = new Date(w.ts);
+
+          // chuyển timestamp sang Date
+          const d = w.ts?.toDate ? w.ts.toDate() : new Date(w.ts);
 
           const el = document.createElement("div");
           el.className = "wish";
           el.innerHTML = `
-        <strong>${w.hidden ? "Ẩn tên" : (w.name || "Học sinh")}</strong>
-        <small>${d.toLocaleString()}</small>
-        <div style="margin-top:6px">${escapeHtml(w.content)}</div>
-      `;
+    <strong>${w.hidden ? "Ẩn tên" : (w.name || "Học sinh")}</strong>
+    <small>${d.toLocaleString()}</small>
+    <div style="margin-top:6px">${escapeHtml(w.content)}</div>
+  `;
           wishesContainer.appendChild(el);
         });
+
       });
     }
 
@@ -719,27 +732,17 @@
     /*****************************
      * Audio background toggle
      *****************************/
-    window.addEventListener('click', firstClickPlay);
-
-    function firstClickPlay() {
-      const bgAudio = document.getElementById('bgAudio');
-      bgAudio.muted = false;
-      bgAudio.volume = 1;
-      bgAudio.play();
-      window.removeEventListener('click', firstClickPlay);
-    }
-
     const audioToggle = document.getElementById('audioToggle');
     const bgAudio = document.getElementById('bgAudio');
+
     audioToggle.addEventListener('click', () => {
       if (bgAudio.paused) {
-        bgAudio.play();
-        audioToggle.textContent = '🔇 Tắt nhạc';
+        bgAudio.play().catch(e => console.log('Play bị ngắt:', e));
       } else {
         bgAudio.pause();
-        audioToggle.textContent = '🔊 Bật nhạc';
       }
     });
+
 
 
     /*****************************
